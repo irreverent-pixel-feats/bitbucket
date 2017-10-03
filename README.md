@@ -1,4 +1,4 @@
-# bitbucket
+# bitbucket [![Build Status](https://img.shields.io/travis/irreverent-pixel-feats/bitbucket.svg?style=flat)](https://travis-ci.org/irreverent-pixel-feats/bitbucket)
 
 ## Description
 
