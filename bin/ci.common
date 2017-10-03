@@ -3,7 +3,13 @@
 git submodule init
 git submodule update
 
-find . -find f -name "*.cabal" | grep -v "^\./lib" | while read P; do
+cabal update
+
+cd bitbucket-cli
+make build
+cd ../
+
+find . -type f -name "*.cabal" | grep -v "^\./lib" | while read P; do
   cd "$(dirname "${P}")"
   ./mafia build
   ./mafia test
