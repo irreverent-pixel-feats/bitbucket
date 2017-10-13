@@ -34,7 +34,7 @@ before_install:
   - export PATH=/opt/ghc/$GHCVER/bin:/opt/cabal/$CABALVER/bin:$PATH
 
 script:
-  - travis_wait 90 bin/ci
+  - bin/ci
 
 notifications:
   slack:
