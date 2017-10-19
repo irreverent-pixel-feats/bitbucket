@@ -10,7 +10,7 @@ description:        bitb CLI
 homepage:           https://github.com/irreverent-pixel-feats/bitbucket
 bug-reports:        https://github.com/irreverent-pixel-feats/bitbucket/issues
 cabal-version:      >= 1.18
-build-type:         Simple
+build-type:         Custom
 
 source-repository       head
     type:               git
@@ -43,7 +43,7 @@ library
     hs-source-dirs:     src
                         gen
 
-    exposed-modules:    BuildInfo_bitb
+    exposed-modules:    BuildInfo_irreverent_bitbucket_cli
                         Irreverent.Bitbucket.Cli.Main
                         Irreverent.Bitbucket.Cli.Commands.ListRepos
 
