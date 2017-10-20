@@ -11,7 +11,7 @@
 -------------------------------------------------------------------
 module Irreverent.Bitbucket.Cli.Main (bitbMain) where
 
-import BuildInfo_bitb
+import BuildInfo_irreverent_bitbucket_cli
 
 import Irreverent.Bitbucket.Cli.Commands.ListRepos
 
