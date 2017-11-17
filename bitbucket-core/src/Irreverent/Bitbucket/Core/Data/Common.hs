@@ -11,6 +11,7 @@
 module Irreverent.Bitbucket.Core.Data.Common (
   -- * Types
     BitbucketTime(..)
+  , GitURLType(..)
   , DisplayName(..)
   , EmailMailingList(..)
   , Language(..)
@@ -43,6 +44,11 @@ import qualified Ultra.Data.Text as T
 import Data.Time.Clock (UTCTime)
 
 import Preamble
+
+data GitURLType =
+    HTTPSGitURLType
+  | SSHGitURLType
+    deriving (Show, Eq)
 
 -- In v2 of the bitbucket API, this seems like a pretty compliant ISO8601 datetime
 newtype BitbucketTime = BitbucketTime { bitbucketTime :: UTCTime} deriving (Show, Eq)
