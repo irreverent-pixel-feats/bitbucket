@@ -13,11 +13,13 @@ module Irreverent.Bitbucket.Options (
     ownerP
   , repoNameP
   , authP
+  , gitURLTypeP
   ) where
 
 import Irreverent.Bitbucket.Core.Data.Common (
     Username(..)
   , RepoName(..)
+  , GitURLType(..)
   )
 
 import Irreverent.Bitbucket.Core.Data.Auth (Auth(..))
@@ -27,6 +29,7 @@ import Ultra.Options.Applicative (
     Parser
   , eitherTextReader
   , envvar
+  , flag'
   , help
   , long
   , option
@@ -37,6 +40,19 @@ import Ultra.Options.Applicative (
 import Data.Monoid ((<>))
 
 import Preamble hiding ((<>))
+
+httpsURLTypeP :: Parser GitURLType
+httpsURLTypeP = flag' HTTPSGitURLType $
+      long "https"
+  <>  help "Provide HTTPS Git URL"
+
+sshGitURLTypeP :: Parser GitURLType
+sshGitURLTypeP = flag' SSHGitURLType $
+      long "ssh"
+  <>  help "Provide SSH Git URL"
+
+gitURLTypeP :: Parser GitURLType
+gitURLTypeP = httpsURLTypeP <|> sshGitURLTypeP
 
 ownerP :: T.Text -> Parser Username
 ownerP htext = option (Username . T.pack <$> str) $
