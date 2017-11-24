@@ -105,4 +105,4 @@ printVersion = putStrLn versionString
 bitbMain :: IO ()
 bitbMain = do
   env <- fmap (bimap T.pack T.pack) <$> getEnvironment
-  parseAndRun "bitb" "Bitbucket cli" (commandParser' env) runCommand
+  parseAndRun "bitb: Dom De Re" "Bitbucket cli" (commandParser' env) runCommand
