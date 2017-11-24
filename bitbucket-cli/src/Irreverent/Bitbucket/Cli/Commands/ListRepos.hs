@@ -10,17 +10,17 @@
 --
 -------------------------------------------------------------------
 module Irreverent.Bitbucket.Cli.Commands.ListRepos (
-  -- * Types
-    ListReposError(..)
   -- * Functions
-  , listRepos
-  , renderListReposError
+    listRepos
   ) where
+
+import Irreverent.Bitbucket.Cli.Error
 
 import Irreverent.Bitbucket.Core (Username(..), RepoDescription(..), RepoName(..), Repository(..), User(..))
 import Irreverent.Bitbucket.Core.Control (BitbucketT(..))
 import Irreverent.Bitbucket.Core.Data.Auth (Auth(..))
-import Irreverent.Bitbucket.Http.Repositories.List (BitbucketAPIError, renderBitbucketAPIError, listRepositories)
+import Irreverent.Bitbucket.Http.Error (BitbucketAPIError)
+import Irreverent.Bitbucket.Http.Repositories.List (listRepositories)
 
 import Ultra.Control.Monad.Trans.Either (EitherT, pattern EitherT, firstEitherT, mapEitherT, runEitherT)
 import Ultra.Data.List.NonEmpty (sortBy)
@@ -40,15 +40,12 @@ data ListReposError =
   ListRepoAPIFail !BitbucketAPIError
   deriving (Show)
 
-renderListReposError :: ListReposError -> T.Text
-renderListReposError (ListRepoAPIFail e) = renderBitbucketAPIError e
-
 listRepos
   :: (MonadIO m)
   => Auth
   -> Username
-  -> EitherT ListReposError m ()
-listRepos auth owner = firstEitherT ListRepoAPIFail . EitherT . liftIO . S.withSession $ \session ->
+  -> EitherT CliError m ()
+listRepos auth owner = firstEitherT BitbucketAPIFail . EitherT . liftIO . S.withSession $ \session ->
   runEitherT . mapEitherT (flip runReaderT auth . runBitbucketT) $ do
     repos <- listRepositories session owner
     let h = printf (T.unpack $ formatString repos) (t "creator") (t "slug") (t "description")

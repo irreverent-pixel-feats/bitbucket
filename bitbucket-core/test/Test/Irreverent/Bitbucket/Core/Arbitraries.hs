@@ -116,6 +116,7 @@ newRepositories :: Gen NewRepository
 newRepositories = NewRepository
   <$> repoDescriptions
   <*> scms
+  <*> maybeOf bitbucketProjectKeys
   <*> forkPolicies
   <*> privacies
   <*> languages

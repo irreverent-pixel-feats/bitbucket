@@ -1,5 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 -------------------------------------------------------------------
 -- |
 -- Module       : Irreverent.Bitbucket.Options
@@ -16,15 +18,25 @@ module Irreverent.Bitbucket.Options (
   , repoNameArgP
   , authP
   , gitURLTypeP
+  , newRepoP
   ) where
 
 import Irreverent.Bitbucket.Core.Data.Common (
     Username(..)
-  , RepoName(..)
+  , ForkPolicy(..)
   , GitURLType(..)
+  , HasWiki(..)
+  , HasIssues(..)
+  , Language(..)
+  , Privacy(..)
+  , ProjectKey(..)
+  , RepoDescription(..)
+  , RepoName(..)
+  , Scm(..)
   )
 
 import Irreverent.Bitbucket.Core.Data.Auth (Auth(..))
+import Irreverent.Bitbucket.Core.Data.NewRepository (NewRepository(..))
 
 import qualified Ultra.Data.Text as T
 import Ultra.Options.Applicative (
@@ -86,10 +98,90 @@ authP env = option (eitherTextReader authReader) $
   <>  long "auth"
   <>  envvar (either (const Nothing) pure . authReader) env "BITBUCKET_API_AUTH" "Bitbucket app password login information, in the form of \"username:password\""
 
+repoDescP :: Parser RepoDescription
+repoDescP = option (RepoDescription . T.pack <$> str) $
+      short 'd'
+  <>  long "description"
+  <>  metavar "DESCRIPTION"
+  <>  help "Description to use for the repo"
+
+gitScmP :: Parser Scm
+gitScmP = flag' Git $
+      long "git"
+  <>  help "Sets the Scm to Git (Default)"
+
+mercurialScmP :: Parser Scm
+mercurialScmP = flag' Mercurial $
+      short 'm'
+  <>  long "mercurial"
+  <>  help "Sets the Scm to Mercurial"
+
+scmP :: Parser Scm
+scmP = gitScmP <|> mercurialScmP <|> pure Git 
+
+projectKeyP :: Parser ProjectKey
+projectKeyP = option (ProjectKey . T.pack <$> str) $
+      short 'p'
+  <>  long "project"
+  <>  metavar "PROJECT_KEY"
+  <>  help "The key for the project you wish to assign this repo to"
+
+enumWithDefaultP :: forall a. (Eq a) => a -> NonEmpty (a, T.Text, T.Text) -> Parser a
+enumWithDefaultP def =
+  let
+    p :: a -> T.Text -> T.Text -> Parser a
+    p fp long' help' = flag' fp $
+          long (T.unpack long')
+      <>  help (T.unpack help')
+    f :: (a, T.Text, T.Text) -> Parser a -> Parser a
+    f (x, long', help') parser =
+      p x long' (help' <> (if x == def then " (Default)" else "")) <|> parser
+  in foldr f (pure def)
+
+forkPolicyP :: Parser ForkPolicy
+forkPolicyP = enumWithDefaultP NoPublicForksPolicy
+  [ (NoForksPolicy, "no-forks", "Allows No Forks on this repo")
+  , (NoPublicForksPolicy, "no-public-forks", "Allows only private forks on the project")
+  , (ForkAwayPolicy, "forks", "Allows public and private forks")
+  ]
+
+privacyP :: Parser Privacy
+privacyP = enumWithDefaultP Private
+  [ (Public, "public", "Repo will be public")
+  , (Private, "private", "Repo will be private")
+  ]
+
+languageP :: Parser Language
+languageP = option (Language . T.pack <$> str) $
+      short 'l'
+  <>  long "lang"
+  <>  metavar "LANGUAGE"
+  <>  help "The predominant language that is to be used"
+
+hasWikiP :: Parser HasWiki
+hasWikiP = enumWithDefaultP NoWiki
+ [ (HasWiki, "has-wiki", "A Wiki will be created for this repo")
+ , (NoWiki, "no-wiki", "No Wiki will be created for this wiki, if there previously was one, it will be deleted")
+ ]
+
+hasIssuesP :: Parser HasIssues
+hasIssuesP = enumWithDefaultP HasIssues
+  [ (HasIssues, "has-issues", "Issue tracking will be setup for this repo")
+  , (NoIssues, "no-issues", "There will be no issue tracking for this repo")
+  ]
+
+newRepoP :: Parser NewRepository
+newRepoP = NewRepository
+  <$> repoDescP
+  <*> scmP
+  <*> optional projectKeyP
+  <*> forkPolicyP
+  <*> privacyP
+  <*> languageP
+  <*> hasWikiP
+  <*> hasIssuesP
+
 authReader :: T.Text -> Either T.Text Auth
 authReader t = case T.splitOn ":" t of
   [] -> Left t
   username:password -> pure . Basic username $ T.intercalate ":" password
-
-
-

@@ -14,13 +14,18 @@ module Irreverent.Bitbucket.Cli.Main (bitbMain) where
 import BuildInfo_irreverent_bitbucket_cli
 
 import Irreverent.Bitbucket.Cli.Commands.ListRepos
+import Irreverent.Bitbucket.Cli.Commands.CreateRepo
+import Irreverent.Bitbucket.Cli.Error
 
 import Irreverent.Bitbucket.Core (GitURLType(..), RepoName(..), Username(..))
 import Irreverent.Bitbucket.Core.Data.Auth (Auth)
+import Irreverent.Bitbucket.Core.Data.NewRepository (NewRepository(..))
 import Irreverent.Bitbucket.Options (
     authP
+  , newRepoP
   , ownerP
   , ownerArgP
+  , repoNameP
   , repoNameArgP
   , gitURLTypeP
   )
@@ -50,28 +55,32 @@ data Command =
     Version
   | ListRepos !Auth !Username
   | GitURL !GitURLType !Username !RepoName
+  | NewRepo !Auth !Username !RepoName !NewRepository
     deriving (Show, Eq)
 
 foldCommand
   :: a
   -> (Auth -> Username -> a)
   -> (GitURLType -> Username -> RepoName -> a)
+  -> (Auth -> Username -> RepoName -> NewRepository -> a)
   -> Command
   -> a
-foldCommand v ls giturl = \case
-  Version               -> v
-  ListRepos auth user   -> ls auth user
-  GitURL urlt user repo -> giturl urlt user repo
+foldCommand v ls giturl newrepo = \case
+  Version                      -> v
+  ListRepos auth user          -> ls auth user
+  GitURL urlt user repo        -> giturl urlt user repo
+  NewRepo auth user rname repo -> newrepo auth user rname repo
 
 commandParser' :: [(T.Text, T.Text)] -> Parser Command
 commandParser' env = commandParser Version [
     command' "ls" "List Repos" (ListRepos <$> authP env <*> ownerP "lists repos owned by this owner")
   , command' "git-url" "Git URL" (GitURL <$> gitURLTypeP <*> ownerArgP "The owner/org for the desired project" <*> repoNameArgP "The project you want the git url for")
+  , command' "new-repo" "Create a new repository" (NewRepo <$> authP env <*> ownerP "The user/org to create this repo under" <*> repoNameP "The full name for the repo" <*> newRepoP)
   ]
 
 runCommand :: Command -> IO ()
 runCommand =
-  renderErrorAndDie renderListReposError . foldCommand (lift printVersion) listRepos printGitURL
+  renderErrorAndDie renderCliError . foldCommand (lift printVersion) listRepos printGitURL newRepo
 
 gitURL
   :: GitURLType

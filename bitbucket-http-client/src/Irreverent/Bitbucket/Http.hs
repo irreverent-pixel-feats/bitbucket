@@ -10,3 +10,4 @@
 module Irreverent.Bitbucket.Http (module X) where
 
 import Irreverent.Bitbucket.Http.Repositories.List as X
+import Irreverent.Bitbucket.Http.Repositories.New as X

@@ -19,6 +19,7 @@ import Preamble
 data NewRepository = NewRepository {
     newRepoDescription :: !RepoDescription
   , newRepoScm         :: !Scm
+  , newRepoProject     :: !(Maybe ProjectKey)
   , newRepoForkPolicy  :: !ForkPolicy
   , newRepoPrivacy     :: !Privacy
   , newRepoLanguage    :: !Language

@@ -28,6 +28,7 @@ module Irreverent.Bitbucket.Json.Common (
   , jsonForkPolicy
   , jsonPrivacy
   , jsonProjectKey
+  , jsonSoloProjectKey
   , jsonProjectName
   , jsonProject
   , jsonRepoDescription
@@ -51,6 +52,7 @@ module Irreverent.Bitbucket.Json.Common (
   , parseForkPolicyJson
   , parsePrivacyJson
   , parseProjectKeyJson
+  , parseSoloProjectKeyJson
   , parseProjectName
   , parseProjectJson
   , parseRepoDescriptionJson
@@ -205,6 +207,17 @@ parsePrivacyJson :: Value -> Parser Privacy
 parsePrivacyJson v = flip fmap (parseJSON v) $ \case
   True  -> Private
   False -> Public
+
+-- |
+-- In some messages, a project key appears in its own field,
+-- but not as a string, but as a JSON object with a field "key"
+jsonSoloProjectKey :: ProjectKey -> Value
+jsonSoloProjectKey (ProjectKey key) = object [
+    "key" .= key
+  ]
+
+parseSoloProjectKeyJson :: Object -> Parser ProjectKey
+parseSoloProjectKeyJson o = ProjectKey <$> o .: "key"
 
 jsonProjectKey :: ProjectKey -> Value
 jsonProjectKey (ProjectKey key) = toJSON key

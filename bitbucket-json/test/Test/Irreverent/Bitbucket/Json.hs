@@ -6,7 +6,7 @@ import Irreverent.Bitbucket.Json
 
 import Test.Irreverent.Bitbucket.Core.Arbitraries
 
-import Ultra.Data.Aeson (eitherDecodeStrict', encode)
+import Ultra.Data.Aeson (eitherDecodeStrict', encode, parseEither)
 
 import Lab.Core.Control.RoundTrip (roundTripProp)
 
@@ -16,6 +16,12 @@ import Lab.Core.QuickCheck.TH (quickCheckAll)
 import qualified Data.ByteString.Lazy as BSL
 
 import Preamble
+
+prop_projectKeySolo :: Property
+prop_projectKeySolo = forAll bitbucketProjectKeys $
+  roundTripProp
+    (BSL.toStrict . encode . jsonSoloProjectKey)
+    (parseEither parseSoloProjectKeyJson <=< eitherDecodeStrict')
 
 prop_newRepository :: Property
 prop_newRepository = forAll newRepositories $
