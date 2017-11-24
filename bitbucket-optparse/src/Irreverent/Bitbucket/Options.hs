@@ -11,7 +11,9 @@
 module Irreverent.Bitbucket.Options (
   -- * Parsers
     ownerP
+  , ownerArgP
   , repoNameP
+  , repoNameArgP
   , authP
   , gitURLTypeP
   ) where
@@ -27,11 +29,13 @@ import Irreverent.Bitbucket.Core.Data.Auth (Auth(..))
 import qualified Ultra.Data.Text as T
 import Ultra.Options.Applicative (
     Parser
+  , argument
   , eitherTextReader
   , envvar
   , flag'
   , help
   , long
+  , metavar
   , option
   , short
   , str
@@ -60,10 +64,20 @@ ownerP htext = option (Username . T.pack <$> str) $
   <>  long "owner"
   <>  help (T.unpack htext)
 
+ownerArgP :: T.Text -> Parser Username
+ownerArgP htext = argument (Username . T.pack <$> str) $
+      metavar "OWNER"
+  <>  help (T.unpack htext)
+
 repoNameP :: T.Text -> Parser RepoName
 repoNameP htext = option (RepoName . T.pack <$> str) $
       short 'r'
   <>  long "repository"
+  <>  help (T.unpack htext)
+
+repoNameArgP :: T.Text -> Parser RepoName
+repoNameArgP htext = argument (RepoName . T.pack <$> str) $
+      metavar "REPONAME"
   <>  help (T.unpack htext)
 
 authP :: [(T.Text, T.Text)] -> Parser Auth

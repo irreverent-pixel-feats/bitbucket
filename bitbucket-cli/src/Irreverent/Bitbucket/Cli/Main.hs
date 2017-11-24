@@ -17,7 +17,13 @@ import Irreverent.Bitbucket.Cli.Commands.ListRepos
 
 import Irreverent.Bitbucket.Core (GitURLType(..), RepoName(..), Username(..))
 import Irreverent.Bitbucket.Core.Data.Auth (Auth)
-import Irreverent.Bitbucket.Options (authP, ownerP, repoNameP, gitURLTypeP)
+import Irreverent.Bitbucket.Options (
+    authP
+  , ownerP
+  , ownerArgP
+  , repoNameArgP
+  , gitURLTypeP
+  )
 
 import Ultra.Cli
 import qualified Ultra.Data.Text as T
@@ -60,7 +66,7 @@ foldCommand v ls giturl = \case
 commandParser' :: [(T.Text, T.Text)] -> Parser Command
 commandParser' env = commandParser Version [
     command' "ls" "List Repos" (ListRepos <$> authP env <*> ownerP "lists repos owned by this owner")
-  , command' "git-url" "Git URL" (GitURL <$> gitURLTypeP <*> ownerP "The owner/org for the desired project" <*> repoNameP "The project you want the git url for")
+  , command' "git-url" "Git URL" (GitURL <$> gitURLTypeP <*> ownerArgP "The owner/org for the desired project" <*> repoNameArgP "The project you want the git url for")
   ]
 
 runCommand :: Command -> IO ()
