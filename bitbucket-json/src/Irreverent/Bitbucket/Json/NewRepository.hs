@@ -19,7 +19,14 @@ import Irreverent.Bitbucket.Json.Common
 
 import Irreverent.Bitbucket.Core.Data.NewRepository
 
-import Ultra.Data.Aeson (FromJSON(..), ToJSON(..), (.=), (.:), object)
+import Ultra.Data.Aeson (
+    FromJSON(..)
+  , ToJSON(..)
+  , (.=)
+  , (.:)
+  , (.:?)
+  , object
+  )
 
 import Preamble
 
@@ -32,9 +39,10 @@ newRepoFromJson (NewRepositoryJsonV2 x) = x
 
 instance ToJSON NewRepositoryJsonV2 where
 --toJSON :: a -> Value
-  toJSON (NewRepositoryJsonV2 (NewRepository desc scm' forkPolicy privacy language hasWiki hasIssues)) =
+  toJSON (NewRepositoryJsonV2 (NewRepository desc scm' project forkPolicy privacy language hasWiki hasIssues)) =
     object [
       "scm"         .= jsonScm scm'
+    , "project"     .= (jsonSoloProjectKey <$> project)
     , "has_wiki"    .= jsonHasWiki hasWiki
     , "has_issues"  .= jsonHasIssues hasIssues
     , "is_private"  .= jsonPrivacy privacy
@@ -50,6 +58,7 @@ instance FromJSON NewRepositoryJsonV2 where
     NewRepository
       <$> (o .: "description" >>= parseRepoDescriptionJson)
       <*> (o .: "scm" >>= parseScmJson)
+      <*> (o .:? "project" >>= traverse parseSoloProjectKeyJson)
       <*> (o .: "fork_policy" >>= parseForkPolicyJson)
       <*> (o .: "is_private" >>= parsePrivacyJson)
       <*> (o .: "language" >>= parseLanguageJson)
