@@ -36,11 +36,11 @@ library
                       , ultra-http-client
                       , ultra-lens
                       , ultra-text
-                      , http-client-tls        < 0.3
-                      , http-conduit           == 2.1.*
+                      , http-client-tls        < 0.4
+                      , http-conduit           == 2.2.*
                       , http-types             == 0.9.*
                       , time                   == 1.6.*
-                      , wreq                   == 0.4.*
+                      , wreq                   == 0.5.*
 
     ghc-options:        -Wall
 

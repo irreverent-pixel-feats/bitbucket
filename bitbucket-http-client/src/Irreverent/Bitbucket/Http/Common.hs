@@ -31,4 +31,4 @@ baseV2URL = baseURL <> "2.0"
 baseReq :: W.Options
 baseReq = W.defaults
   & (W.redirects .~ 10)
-  . (W.checkStatus .~ Nothing)
+  . (W.checkResponse .~ Nothing)
