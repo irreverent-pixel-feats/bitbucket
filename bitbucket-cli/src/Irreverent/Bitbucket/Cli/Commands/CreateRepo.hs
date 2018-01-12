@@ -22,7 +22,8 @@ import Irreverent.Bitbucket.Core.Data.NewRepository (NewRepository(..))
 import Irreverent.Bitbucket.Http.Repositories.New (createRepo)
 import Irreverent.Bitbucket.Json.Repository (RepositoryJsonV2(..))
 
-import Ultra.Control.Monad.Trans.Either (EitherT, pattern EitherT, firstEitherT, mapEitherT, runEitherT)
+import Ultra.Control.Monad.Catch (MonadCatch)
+import Ultra.Control.Monad.Trans.Either (EitherT, firstEitherT, mapEitherT)
 
 import Data.Aeson.Encode.Pretty (encodePretty)
 import qualified Data.ByteString.Lazy as BSL
@@ -33,13 +34,14 @@ import System.IO (stdout)
 import Preamble
 
 newRepo
-  :: (MonadIO m)
+  :: (MonadCatch m, MonadIO m)
   => Auth
   -> Username
   -> RepoName
   -> NewRepository
   -> EitherT CliError m ()
-newRepo auth owner rname repo = firstEitherT BitbucketAPIFail . EitherT . liftIO . S.withSession $ \s ->
-  runEitherT . mapEitherT (flip runReaderT auth . runBitbucketT) $ do
+newRepo auth owner rname repo =
+  firstEitherT BitbucketAPIFail . mapEitherT (flip runReaderT auth . runBitbucketT) $ do
+    s <- liftIO S.newSession
     createRepo s owner rname repo >>= liftIO . BSL.hPutStr stdout . encodePretty . RepositoryJsonV2
 

@@ -22,7 +22,8 @@ import Irreverent.Bitbucket.Core.Data.Auth (Auth(..))
 import Irreverent.Bitbucket.Http.Error (BitbucketAPIError)
 import Irreverent.Bitbucket.Http.Repositories.List (listRepositories)
 
-import Ultra.Control.Monad.Trans.Either (EitherT, pattern EitherT, firstEitherT, mapEitherT, runEitherT)
+import Ultra.Control.Monad.Catch (MonadCatch)
+import Ultra.Control.Monad.Trans.Either (EitherT, firstEitherT, mapEitherT)
 import Ultra.Data.List.NonEmpty (sortBy)
 import qualified Ultra.Data.Text as T
 
@@ -41,24 +42,24 @@ data ListReposError =
   deriving (Show)
 
 listRepos
-  :: (MonadIO m)
+  :: (MonadCatch m, MonadIO m)
   => Auth
   -> Username
   -> EitherT CliError m ()
-listRepos auth owner = firstEitherT BitbucketAPIFail . EitherT . liftIO . S.withSession $ \session ->
-  runEitherT . mapEitherT (flip runReaderT auth . runBitbucketT) $ do
-    repos <- listRepositories session owner
-    let h = printf (T.unpack $ formatString repos) (t "creator") (t "slug") (t "description")
-    let b = replicate (length h - 1) '-'
-    liftIO $ hPutStr stdout h >> hPutStrLn stdout b
-    forM_ repos $ \repo -> lift . lift $
+listRepos auth owner = firstEitherT BitbucketAPIFail . mapEitherT (flip runReaderT auth . runBitbucketT) $ do
+  session <- liftIO S.newSession
+  repos <- listRepositories session owner
+  let h = printf (T.unpack $ formatString repos) (t "creator") (t "slug") (t "description")
+  let b = replicate (length h - 1) '-'
+  liftIO $ hPutStr stdout h >> hPutStrLn stdout b
+  forM_ repos $ \repo -> liftIO $
       printf
         (T.unpack $ formatString repos)
         (maybe "None" (getUsername . userName) . repoCreator $ repo)
         (getRepoName . repoName $ repo)
         (getDescription . repoDescription $ repo)
-    -- runEitherT . mapEitherT (flip runReaderT auth . runBitbucketT) $ do
-    --   repoConduit session owner $$ listSink
+  -- runEitherT . mapEitherT (flip runReaderT auth . runBitbucketT) $ do
+  --   repoConduit session owner $$ listSink
 
 biggestLengthBy :: [a] -> (a -> Int) -> Int -> Int
 biggestLengthBy xs f def = maybe def (head . sortBy (flip compare)) . nonEmpty . fmap f $ xs

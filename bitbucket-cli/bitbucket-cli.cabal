@@ -35,10 +35,11 @@ library
                       , ultra-cli
                       , ultra-conduit
                       , ultra-either
+                      , ultra-exceptions
                       , ultra-optparse
                       , ultra-text
                       , ultra-semigroups
-                      , wreq                   == 0.4.*
+                      , wreq                    == 0.5.*
 
     ghc-options:        -Wall
 
