@@ -49,6 +49,8 @@ library
     exposed-modules:    Irreverent.Bitbucket.Http
                         Irreverent.Bitbucket.Http.Common
                         Irreverent.Bitbucket.Http.Error
+                        Irreverent.Bitbucket.Http.Repositories.Pipelines.UpdateConfig
+                        Irreverent.Bitbucket.Http.Repositories.Pipelines.GetConfig
                         Irreverent.Bitbucket.Http.Repositories.List
                         Irreverent.Bitbucket.Http.Repositories.New
 

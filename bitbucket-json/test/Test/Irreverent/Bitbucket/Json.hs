@@ -35,6 +35,24 @@ prop_repository = forAll repositories $
     (BSL.toStrict . encode . RepositoryJsonV2)
     (fmap repoFromJson . eitherDecodeStrict')
 
+prop_repositorySummary :: Property
+prop_repositorySummary = forAll repositorySummaries $
+  roundTripProp
+    (BSL.toStrict . encode . RepositorySummaryJsonV2)
+    (fmap repoSummaryFromJson . eitherDecodeStrict')
+
+prop_pipelineConfig :: Property
+prop_pipelineConfig = forAll pipelineConfigs $
+  roundTripProp
+    (BSL.toStrict . encode . PipelinesConfigJsonV2)
+    (fmap pipelineConfigFromJson . eitherDecodeStrict')
+
+prop_updatePipelineConfig :: Property
+prop_updatePipelineConfig = forAll updatePipelineConfigs $
+  roundTripProp
+    (BSL.toStrict . encode . UpdatePipelinesConfigJsonV2)
+    (fmap updatePipelineConfigFromJson . eitherDecodeStrict')
+
 return []
 tests :: IO Bool
 tests = $quickCheckAll

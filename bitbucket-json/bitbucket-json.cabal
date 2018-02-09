@@ -41,7 +41,10 @@ library
                         Irreverent.Bitbucket.Json.Common
                         Irreverent.Bitbucket.Json.NewRepository
                         Irreverent.Bitbucket.Json.Paginated
+                        Irreverent.Bitbucket.Json.Pipelines.Config
+                        Irreverent.Bitbucket.Json.Pipelines.UpdateConfig
                         Irreverent.Bitbucket.Json.Repository
+                        Irreverent.Bitbucket.Json.RepositorySummary
 
 test-suite              test
     default-language:   Haskell2010

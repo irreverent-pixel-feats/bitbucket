@@ -49,6 +49,8 @@ library
     exposed-modules:    BuildInfo_irreverent_bitbucket_cli
                         Irreverent.Bitbucket.Cli.Commands.CreateRepo
                         Irreverent.Bitbucket.Cli.Commands.ListRepos
+                        Irreverent.Bitbucket.Cli.Commands.PipelineConfig
+                        Irreverent.Bitbucket.Cli.Commands.UpdatePipelineConfig
                         Irreverent.Bitbucket.Cli.Error
                         Irreverent.Bitbucket.Cli.Main
 

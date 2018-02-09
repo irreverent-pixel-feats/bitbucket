@@ -20,6 +20,9 @@ module Test.Irreverent.Bitbucket.Core.Arbitraries (
   , repoDescriptions
   , repoNames
   , repositories
+  , repositorySummaries
+  , pipelineConfigs
+  , updatePipelineConfigs
   , scms
   , uuids
   , uris
@@ -29,6 +32,9 @@ module Test.Irreverent.Bitbucket.Core.Arbitraries (
 import Irreverent.Bitbucket.Core.Data.Common
 import Irreverent.Bitbucket.Core.Data.NewRepository
 import Irreverent.Bitbucket.Core.Data.Repository
+import Irreverent.Bitbucket.Core.Data.RepositorySummary
+import Irreverent.Bitbucket.Core.Data.Pipelines.Config
+import Irreverent.Bitbucket.Core.Data.Pipelines.UpdateConfig
 
 import Lab.Core.Gen (maybeOf, textOf, alphaNumChars)
 import Lab.Core.QuickCheck (Arbitrary(..), Gen, NonNegative(..), elements)
@@ -154,3 +160,21 @@ repositories = Repository
   <*> hrefs
   <*> hrefs
   <*> repoNames
+
+repositorySummaries :: Gen RepositorySummary
+repositorySummaries = RepositorySummary
+  <$> repoNames
+  <*> repoNames
+  <*> hrefs
+  <*> hrefs
+  <*> hrefs
+  <*> uuids
+
+pipelineConfigs :: Gen PipelinesConfig
+pipelineConfigs = PipelinesConfig
+  <$> arbitrary
+  <*> repositorySummaries
+
+updatePipelineConfigs :: Gen UpdatePipelinesConfig
+updatePipelineConfigs = UpdatePipelinesConfig
+  <$> arbitrary

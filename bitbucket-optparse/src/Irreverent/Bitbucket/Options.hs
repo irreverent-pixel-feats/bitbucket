@@ -19,6 +19,7 @@ module Irreverent.Bitbucket.Options (
   , authP
   , gitURLTypeP
   , newRepoP
+  , pipelineCfgUpdateP
   ) where
 
 import Irreverent.Bitbucket.Core.Data.Common (
@@ -37,6 +38,7 @@ import Irreverent.Bitbucket.Core.Data.Common (
 
 import Irreverent.Bitbucket.Core.Data.Auth (Auth(..))
 import Irreverent.Bitbucket.Core.Data.NewRepository (NewRepository(..))
+import Irreverent.Bitbucket.Core.Data.Pipelines.UpdateConfig (UpdatePipelinesConfig(..))
 
 import qualified Ultra.Data.Text as T
 import Ultra.Options.Applicative (
@@ -180,6 +182,23 @@ newRepoP = NewRepository
   <*> languageP
   <*> hasWikiP
   <*> hasIssuesP
+
+pipelineCfgUpdateP :: Parser UpdatePipelinesConfig
+pipelineCfgUpdateP = UpdatePipelinesConfig
+  <$> pipelineEnabledP
+
+enablePipelineP :: Parser Bool
+enablePipelineP = flag' True $
+      long "enabled"
+  <>  help "Turns the pipeline on"
+
+disablePipelineP :: Parser Bool
+disablePipelineP = flag' False $
+      long "disabled"
+  <>  help "Turns the pipeline off"
+
+pipelineEnabledP :: Parser Bool
+pipelineEnabledP = enablePipelineP <|> disablePipelineP
 
 authReader :: T.Text -> Either T.Text Auth
 authReader t = case T.splitOn ":" t of

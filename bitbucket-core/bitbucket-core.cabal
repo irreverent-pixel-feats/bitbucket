@@ -41,7 +41,10 @@ library
                         Irreverent.Bitbucket.Core.Data.Common
                         Irreverent.Bitbucket.Core.Data.NewRepository
                         Irreverent.Bitbucket.Core.Data.Paginated
+                        Irreverent.Bitbucket.Core.Data.Pipelines.Config
+                        Irreverent.Bitbucket.Core.Data.Pipelines.UpdateConfig
                         Irreverent.Bitbucket.Core.Data.Repository
+                        Irreverent.Bitbucket.Core.Data.RepositorySummary
 
 test-suite              test
     default-language:   Haskell2010
