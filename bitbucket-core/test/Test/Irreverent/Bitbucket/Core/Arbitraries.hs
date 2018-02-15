@@ -10,13 +10,22 @@ module Test.Irreverent.Bitbucket.Core.Arbitraries (
   , bitbucketUsernames
   , bitbucketUsers
   , bitbucketUserTypes
+  , environmentVariables
+  , environmentVariableValues
   , forkPolicies
   , hasIssues
   , hasWikis
   , hrefs
   , languages
+  , accessKeys
+  , newAccessKeys
   , newRepositories
+  , newEnvironmentVariables
+  , newSSHKeyPairs
   , privacies
+  , privateSSHKeys
+  , publicSSHKeys
+  , pipelineEnvVarSecurity
   , repoDescriptions
   , repoNames
   , repositories
@@ -24,20 +33,16 @@ module Test.Irreverent.Bitbucket.Core.Arbitraries (
   , pipelineConfigs
   , updatePipelineConfigs
   , scms
+  , sshKeyPairs
   , uuids
   , uris
   , websites
   ) where
 
-import Irreverent.Bitbucket.Core.Data.Common
-import Irreverent.Bitbucket.Core.Data.NewRepository
-import Irreverent.Bitbucket.Core.Data.Repository
-import Irreverent.Bitbucket.Core.Data.RepositorySummary
-import Irreverent.Bitbucket.Core.Data.Pipelines.Config
-import Irreverent.Bitbucket.Core.Data.Pipelines.UpdateConfig
+import Irreverent.Bitbucket.Core
 
-import Lab.Core.Gen (maybeOf, textOf, alphaNumChars)
-import Lab.Core.QuickCheck (Arbitrary(..), Gen, NonNegative(..), elements)
+import Lab.Core.Gen (maybeOf, textOf, textOfN, alphaNumChars, numChars)
+import Lab.Core.QuickCheck (Arbitrary(..), Gen, NonNegative(..), elements, frequency)
 
 import Test.QuickCheck.Instances ()
 
@@ -178,3 +183,53 @@ pipelineConfigs = PipelinesConfig
 updatePipelineConfigs :: Gen UpdatePipelinesConfig
 updatePipelineConfigs = UpdatePipelinesConfig
   <$> arbitrary
+
+publicSSHKeys :: Gen PublicSSHKey
+publicSSHKeys = PublicSSHKey <$> textOf alphaNumChars
+
+privateSSHKeys :: Gen PrivateSSHKey
+privateSSHKeys = PrivateSSHKey <$> textOf alphaNumChars
+
+pipelineEnvVarSecurity :: Gen PipelinesEnvironmentVariableSecurity
+pipelineEnvVarSecurity = elements [
+    SecuredVariable
+  , UnsecuredVariable
+  ]
+
+environmentVariableValues :: Gen PipelinesEnvironmentVariableValue
+environmentVariableValues = frequency [
+    (1, pure SecuredPipelinesVariableValue)
+  , (4, UnsecuredPipelinesVariableValue <$> textOf alphaNumChars)
+  ]
+
+newEnvironmentVariables :: Gen NewPipelinesEnvironmentVariable
+newEnvironmentVariables = NewPipelinesEnvironmentVariable
+  <$> textOf alphaNumChars
+  <*> textOf alphaNumChars
+  <*> pipelineEnvVarSecurity
+
+environmentVariables :: Gen PipelinesEnvironmentVariable
+environmentVariables = PipelinesEnvironmentVariable
+  <$> environmentVariableValues
+  <*> textOf alphaNumChars
+  <*> uuids
+
+newSSHKeyPairs :: Gen NewPipelinesSSHKeyPair
+newSSHKeyPairs = NewPipelinesSSHKeyPair
+  <$> privateSSHKeys
+  <*> publicSSHKeys
+
+sshKeyPairs :: Gen PipelinesSSHKeyPair
+sshKeyPairs = PipelinesSSHKeyPair
+  <$> publicSSHKeys
+
+newAccessKeys :: Gen NewAccessKey
+newAccessKeys = NewAccessKey
+  <$> maybeOf (textOf alphaNumChars)
+  <*> publicSSHKeys
+
+accessKeys :: Gen AccessKey
+accessKeys = AccessKey
+  <$> maybeOf (textOf alphaNumChars)
+  <*> publicSSHKeys
+  <*> textOfN 6 numChars

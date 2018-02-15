@@ -26,10 +26,13 @@ module Irreverent.Bitbucket.Core.Data.Common (
   , ForkPolicy(..)
   , MqOf(..)
   , MqType(..)
+  , PipelinesEnvironmentVariableSecurity(..)
   , Privacy(..)
+  , PrivateSSHKey(..)
   , Project(..)
   , ProjectKey(..)
   , ProjectName(..)
+  , PublicSSHKey(..)
   , ReadWriteMode(..)
   , RepoDescription(..)
   , RepoName(..)
@@ -156,6 +159,23 @@ data MqType =
     IsPatchQueue
   | NotPatchQueue
     deriving (Show, Eq)
+
+-- |
+-- Env vars can be secured, in which case the values
+-- will never be exposed in the logs or the REST API.
+-- They only get exposed to the pipeline builds.
+data PipelinesEnvironmentVariableSecurity =
+    SecuredVariable
+  | UnsecuredVariable
+    deriving (Show, Eq)
+
+newtype PublicSSHKey = PublicSSHKey {
+    publicKeyText :: T.Text
+  } deriving (Show, Eq)
+
+newtype PrivateSSHKey = PrivateSSHKey {
+    privateKeyText :: T.Text
+  } deriving (Show, Eq)
 
 -- |
 -- `ForkPermissions` and `PublicForkPermissions` are v1
