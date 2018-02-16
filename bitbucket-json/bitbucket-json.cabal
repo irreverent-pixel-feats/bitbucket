@@ -39,9 +39,15 @@ library
 
     exposed-modules:    Irreverent.Bitbucket.Json
                         Irreverent.Bitbucket.Json.Common
+                        Irreverent.Bitbucket.Json.AccessKey
+                        Irreverent.Bitbucket.Json.NewAccessKey
                         Irreverent.Bitbucket.Json.NewRepository
                         Irreverent.Bitbucket.Json.Paginated
                         Irreverent.Bitbucket.Json.Pipelines.Config
+                        Irreverent.Bitbucket.Json.Pipelines.EnvironmentVariable
+                        Irreverent.Bitbucket.Json.Pipelines.NewEnvironmentVariable
+                        Irreverent.Bitbucket.Json.Pipelines.NewSSHKeyPair
+                        Irreverent.Bitbucket.Json.Pipelines.SSHKeyPair
                         Irreverent.Bitbucket.Json.Pipelines.UpdateConfig
                         Irreverent.Bitbucket.Json.Repository
                         Irreverent.Bitbucket.Json.RepositorySummary

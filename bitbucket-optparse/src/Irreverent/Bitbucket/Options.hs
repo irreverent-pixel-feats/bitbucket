@@ -17,8 +17,11 @@ module Irreverent.Bitbucket.Options (
   , repoNameP
   , repoNameArgP
   , authP
+  , envvarNameToDeleteP
+  , forceEnvVarSetP
   , gitURLTypeP
   , newRepoP
+  , newPipelineEnvVarP
   , pipelineCfgUpdateP
   ) where
 
@@ -29,6 +32,7 @@ import Irreverent.Bitbucket.Core.Data.Common (
   , HasWiki(..)
   , HasIssues(..)
   , Language(..)
+  , PipelinesEnvironmentVariableSecurity(..)
   , Privacy(..)
   , ProjectKey(..)
   , RepoDescription(..)
@@ -38,6 +42,7 @@ import Irreverent.Bitbucket.Core.Data.Common (
 
 import Irreverent.Bitbucket.Core.Data.Auth (Auth(..))
 import Irreverent.Bitbucket.Core.Data.NewRepository (NewRepository(..))
+import Irreverent.Bitbucket.Core.Data.Pipelines.NewEnvironmentVariable (NewPipelinesEnvironmentVariable(..))
 import Irreverent.Bitbucket.Core.Data.Pipelines.UpdateConfig (UpdatePipelinesConfig(..))
 
 import qualified Ultra.Data.Text as T
@@ -46,6 +51,7 @@ import Ultra.Options.Applicative (
   , argument
   , eitherTextReader
   , envvar
+  , flag
   , flag'
   , help
   , long
@@ -204,3 +210,40 @@ authReader :: T.Text -> Either T.Text Auth
 authReader t = case T.splitOn ":" t of
   [] -> Left t
   username:password -> pure . Basic username $ T.intercalate ":" password
+
+newPipelineEnvVarP :: Parser NewPipelinesEnvironmentVariable
+newPipelineEnvVarP = NewPipelinesEnvironmentVariable
+  <$> envvarNameP
+  <*> envvarValueP
+  <*> envvarSecurityP
+
+forceEnvVarSetP :: Parser (Maybe ())
+forceEnvVarSetP = flag Nothing (pure ()) $
+      short 'f'
+  <>  long "force"
+  <>  help "If environment variable already exists, overwrite it, otherwise operation will fail if environment variable already exists"
+
+envvarNameP :: Parser T.Text
+envvarNameP = option (T.pack <$> str) $
+      short 'n'
+  <>  long "name"
+  <>  metavar "NAME"
+  <>  help "The name for the environment variable you wish to add to pipelines"
+
+envvarNameToDeleteP :: Parser T.Text
+envvarNameToDeleteP = option (T.pack <$> str) $
+      short 'n'
+  <>  long "name"
+  <>  metavar "NAME"
+  <>  help "The name for the environment variable you wish to remove"
+
+envvarValueP :: Parser T.Text
+envvarValueP = option (T.pack <$> str) $
+      long "value"
+  <>  metavar "VALUE"
+  <>  help "The value you wish to set the pipeline environment variable to"
+
+envvarSecurityP :: Parser PipelinesEnvironmentVariableSecurity
+envvarSecurityP = flag SecuredVariable UnsecuredVariable $
+      long "unsecured"
+  <>  help "Will expose the environment variable in the REST API, GUI and Logs, the default behaviour if this is unspecified is \"secured\" behaviour where you cannot retrieve the value via the REST API, GUI or logs, the value is only exposed to the builds"

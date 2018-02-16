@@ -11,6 +11,7 @@
 module Irreverent.Bitbucket.Http.Common (
   -- * Values
     baseURL
+  , baseV1URL
   , baseV2URL
   , baseReq
   ) where
@@ -24,6 +25,9 @@ import Preamble
 
 baseURL :: T.Text
 baseURL = "https://api.bitbucket.org/"
+
+baseV1URL :: T.Text
+baseV1URL = baseURL <> "1.0"
 
 baseV2URL :: T.Text
 baseV2URL = baseURL <> "2.0"

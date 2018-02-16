@@ -39,9 +39,15 @@ library
                         Irreverent.Bitbucket.Core.Control
                         Irreverent.Bitbucket.Core.Data.Auth
                         Irreverent.Bitbucket.Core.Data.Common
+                        Irreverent.Bitbucket.Core.Data.AccessKey
+                        Irreverent.Bitbucket.Core.Data.NewAccessKey
                         Irreverent.Bitbucket.Core.Data.NewRepository
                         Irreverent.Bitbucket.Core.Data.Paginated
                         Irreverent.Bitbucket.Core.Data.Pipelines.Config
+                        Irreverent.Bitbucket.Core.Data.Pipelines.EnvironmentVariable
+                        Irreverent.Bitbucket.Core.Data.Pipelines.NewEnvironmentVariable
+                        Irreverent.Bitbucket.Core.Data.Pipelines.NewSSHKeyPair
+                        Irreverent.Bitbucket.Core.Data.Pipelines.SSHKeyPair
                         Irreverent.Bitbucket.Core.Data.Pipelines.UpdateConfig
                         Irreverent.Bitbucket.Core.Data.Repository
                         Irreverent.Bitbucket.Core.Data.RepositorySummary

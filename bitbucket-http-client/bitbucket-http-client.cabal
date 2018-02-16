@@ -49,10 +49,17 @@ library
     exposed-modules:    Irreverent.Bitbucket.Http
                         Irreverent.Bitbucket.Http.Common
                         Irreverent.Bitbucket.Http.Error
-                        Irreverent.Bitbucket.Http.Repositories.Pipelines.UpdateConfig
-                        Irreverent.Bitbucket.Http.Repositories.Pipelines.GetConfig
+                        Irreverent.Bitbucket.Http.Methods
+                        Irreverent.Bitbucket.Http.Paginated
+                        Irreverent.Bitbucket.Http.Repositories.AddAccessKey
                         Irreverent.Bitbucket.Http.Repositories.List
                         Irreverent.Bitbucket.Http.Repositories.New
+                        Irreverent.Bitbucket.Http.Repositories.Pipelines.UpdateConfig
+                        Irreverent.Bitbucket.Http.Repositories.Pipelines.AddEnvironmentVariable
+                        Irreverent.Bitbucket.Http.Repositories.Pipelines.AddSSHKeyPair
+                        Irreverent.Bitbucket.Http.Repositories.Pipelines.DeleteEnvironmentVariable
+                        Irreverent.Bitbucket.Http.Repositories.Pipelines.GetConfig
+                        Irreverent.Bitbucket.Http.Repositories.Pipelines.GetEnvironmentVariables
 
 test-suite              test
     default-language:   Haskell2010

@@ -6,16 +6,27 @@ import Irreverent.Bitbucket.Json
 
 import Test.Irreverent.Bitbucket.Core.Arbitraries
 
-import Ultra.Data.Aeson (eitherDecodeStrict', encode, parseEither)
+import Ultra.Data.Aeson (FromJSON, ToJSON, eitherDecodeStrict', encode, parseEither)
 
 import Lab.Core.Control.RoundTrip (roundTripProp)
 
-import Lab.Core.QuickCheck (Property, forAll)
+import Lab.Core.QuickCheck (Gen, Property, forAll)
 import Lab.Core.QuickCheck.TH (quickCheckAll)
 
 import qualified Data.ByteString.Lazy as BSL
 
 import Preamble
+
+test
+  :: (Show a, Eq a, FromJSON b, ToJSON b)
+  => Gen a
+  -> (a -> b)
+  -> (b -> a)
+  -> Property
+test gen toJson fromJson = forAll gen $
+  roundTripProp
+    (BSL.toStrict . encode . toJson)
+    (fmap fromJson . eitherDecodeStrict')
 
 prop_projectKeySolo :: Property
 prop_projectKeySolo = forAll bitbucketProjectKeys $
@@ -52,6 +63,46 @@ prop_updatePipelineConfig = forAll updatePipelineConfigs $
   roundTripProp
     (BSL.toStrict . encode . UpdatePipelinesConfigJsonV2)
     (fmap updatePipelineConfigFromJson . eitherDecodeStrict')
+
+prop_newAccessKey :: Property
+prop_newAccessKey = forAll newAccessKeys $
+  roundTripProp
+    (BSL.toStrict . encode . NewAccessKeyJsonV1)
+    (fmap newAccessKeyFromJson . eitherDecodeStrict')
+
+prop_accessKey :: Property
+prop_accessKey = test
+  accessKeys
+  AccessKeyJsonV1
+  accessKeyFromJson
+
+prop_newEnvironmentVariable :: Property
+prop_newEnvironmentVariable =
+  test
+    newEnvironmentVariables
+    PipelinesNewEnvironmentVariableJsonV2
+    pipelineNewEnvironmentVariableFromJson
+
+prop_environmentVariables :: Property
+prop_environmentVariables =
+  test
+    environmentVariables
+    PipelinesEnvironmentVariableJsonV2
+    pipelineEnvironmentVariableFromJson
+
+prop_SSHKeyPair :: Property
+prop_SSHKeyPair =
+  test
+    sshKeyPairs
+    PipelinesSSHKeyPairJsonV2
+    pipelineSSHKeyPairFromJson
+
+prop_newSSHKeyPair :: Property
+prop_newSSHKeyPair =
+  test
+    newSSHKeyPairs
+    PipelinesNewSSHKeyPairJsonV2
+    pipelineNewSSHKeyPairFromJson
 
 return []
 tests :: IO Bool
