@@ -26,11 +26,14 @@ module Irreverent.Bitbucket.Json.Common (
   , jsonUser
   , jsonUserType
   , jsonForkPolicy
+  , jsonPipelineEnvVarSecurity
   , jsonPrivacy
   , jsonProjectKey
   , jsonSoloProjectKey
   , jsonProjectName
   , jsonProject
+  , jsonPublicSSHKey
+  , jsonPrivateSSHKey
   , jsonRepoDescription
   , jsonRepoName
   , jsonRepoSlug
@@ -53,8 +56,11 @@ module Irreverent.Bitbucket.Json.Common (
   , parsePrivacyJson
   , parseProjectKeyJson
   , parseSoloProjectKeyJson
+  , parsePipelineEnvSecurity
   , parseProjectName
   , parseProjectJson
+  , parsePublicSSHKey
+  , parsePrivateSSHKey
   , parseRepoDescriptionJson
   , parseRepoName
   , parseRepoSlug
@@ -224,6 +230,27 @@ jsonProjectKey (ProjectKey key) = toJSON key
 
 parseProjectKeyJson :: Value -> Parser ProjectKey
 parseProjectKeyJson v = ProjectKey <$> parseJSON v
+
+jsonPublicSSHKey :: PublicSSHKey -> Value
+jsonPublicSSHKey (PublicSSHKey key) = toJSON key
+
+parsePublicSSHKey :: Value -> Parser PublicSSHKey
+parsePublicSSHKey v = PublicSSHKey <$> parseJSON v
+
+jsonPrivateSSHKey :: PrivateSSHKey -> Value
+jsonPrivateSSHKey (PrivateSSHKey key) = toJSON key
+
+parsePrivateSSHKey :: Value -> Parser PrivateSSHKey
+parsePrivateSSHKey v = PrivateSSHKey <$> parseJSON v
+
+jsonPipelineEnvVarSecurity :: PipelinesEnvironmentVariableSecurity -> Value
+jsonPipelineEnvVarSecurity SecuredVariable = toJSON True
+jsonPipelineEnvVarSecurity UnsecuredVariable = toJSON False
+
+parsePipelineEnvSecurity :: Value -> Parser PipelinesEnvironmentVariableSecurity
+parsePipelineEnvSecurity v = flip fmap (parseJSON v) $ \case
+  True  -> SecuredVariable
+  False -> UnsecuredVariable
 
 jsonProjectName :: ProjectName -> Value
 jsonProjectName (ProjectName name) = toJSON name
