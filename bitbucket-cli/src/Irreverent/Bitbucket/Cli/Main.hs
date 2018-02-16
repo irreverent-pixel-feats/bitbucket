@@ -17,20 +17,27 @@ import Irreverent.Bitbucket.Cli.Commands.ListRepos
 import Irreverent.Bitbucket.Cli.Commands.CreateRepo
 import Irreverent.Bitbucket.Cli.Commands.PipelineConfig
 import Irreverent.Bitbucket.Cli.Commands.UpdatePipelineConfig
+import Irreverent.Bitbucket.Cli.Commands.SetPipelineEnvironmentVariable
+import Irreverent.Bitbucket.Cli.Commands.DeletePipelineEnvironmentVariable
+import Irreverent.Bitbucket.Cli.Commands.GetPipelineEnvironmentVariables
 import Irreverent.Bitbucket.Cli.Error
 
 import Irreverent.Bitbucket.Core (GitURLType(..), RepoName(..), Username(..))
 import Irreverent.Bitbucket.Core.Data.Auth (Auth)
 import Irreverent.Bitbucket.Core.Data.NewRepository (NewRepository(..))
 import Irreverent.Bitbucket.Core.Data.Pipelines.UpdateConfig (UpdatePipelinesConfig(..))
+import Irreverent.Bitbucket.Core.Data.Pipelines.NewEnvironmentVariable (NewPipelinesEnvironmentVariable(..))
 import Irreverent.Bitbucket.Options (
     authP
+  , envvarNameToDeleteP
+  , forceEnvVarSetP
   , newRepoP
   , ownerP
   , ownerArgP
   , repoNameP
   , repoNameArgP
   , gitURLTypeP
+  , newPipelineEnvVarP
   , pipelineCfgUpdateP
   )
 
@@ -62,6 +69,9 @@ data Command =
   | NewRepo !Auth !Username !RepoName !NewRepository
   | UpdatePipelineCfg !Auth !Username !RepoName !UpdatePipelinesConfig
   | GetPipelineCfg !Auth !Username !RepoName
+  | SetPipelineEnvironmentVariable !Auth !Username !RepoName !(Maybe ()) !NewPipelinesEnvironmentVariable
+  | GetPipelineEnvironmentVariables !Auth !Username !RepoName
+  | RmPipelineEnvironmentVariable !Auth !Username !RepoName !T.Text
     deriving (Show, Eq)
 
 foldCommand
@@ -71,15 +81,21 @@ foldCommand
   -> (Auth -> Username -> RepoName -> NewRepository -> a)
   -> (Auth -> Username -> RepoName -> UpdatePipelinesConfig -> a)
   -> (Auth -> Username -> RepoName -> a)
+  -> (Auth -> Username -> RepoName -> Maybe () -> NewPipelinesEnvironmentVariable -> a)
+  -> (Auth -> Username -> RepoName -> a)
+  -> (Auth -> Username -> RepoName -> T.Text -> a)
   -> Command
   -> a
-foldCommand v ls giturl newrepo updatePipelinesCfg' getPipelineCfg' = \case
+foldCommand v ls giturl newrepo updatePipelinesCfg' getPipelineCfg' addEnvvar' pipelineEnvs' rmPipelineEnv' = \case
   Version                      -> v
   ListRepos auth user          -> ls auth user
   GitURL urlt user repo        -> giturl urlt user repo
   NewRepo auth user rname repo -> newrepo auth user rname repo
   UpdatePipelineCfg auth user rname cfg -> updatePipelinesCfg' auth user rname cfg
   GetPipelineCfg auth user rname -> getPipelineCfg' auth user rname
+  SetPipelineEnvironmentVariable auth user rname force var -> addEnvvar' auth user rname force var
+  GetPipelineEnvironmentVariables auth user rname -> pipelineEnvs' auth user rname
+  RmPipelineEnvironmentVariable auth user rname var -> rmPipelineEnv' auth user rname var
 
 commandParser' :: [(T.Text, T.Text)] -> Parser Command
 commandParser' env = commandParser Version [
@@ -88,11 +104,14 @@ commandParser' env = commandParser Version [
   , command' "new-repo" "Create a new repository" (NewRepo <$> authP env <*> ownerP "The user/org to create this repo under" <*> repoNameP "The full name for the repo" <*> newRepoP)
   , command' "get-pipelines-cfg" "Retrieve the Pipelines settings for a repo" (GetPipelineCfg <$> authP env <*> ownerP "The user/org that owns the repo" <*> repoNameP "The name of the repo for the pipeline")
   , command' "update-pipelines-cfg" "Update the Pipelines settings for a repo" (UpdatePipelineCfg <$> authP env <*> ownerP "The user/org that owns the repo" <*> repoNameP "The name of the repo for the pipeline" <*> pipelineCfgUpdateP)
+  , command' "set-envvar" "Sets an Environment Variable to a pipeline configuration" (SetPipelineEnvironmentVariable <$> authP env <*> ownerP "The user/org that owns the repo" <*> repoNameP "The name of the repo for the pipeline" <*> forceEnvVarSetP <*> newPipelineEnvVarP)
+  , command' "ls-envvar" "List all the Environment Variables for a bitbucket pipeline" (GetPipelineEnvironmentVariables <$> authP env <*> ownerP "The user/org that owns the repo" <*> repoNameP "The name of the repo for the pipeline")
+  , command' "rm-envvar" "Remove an Environment Variable from a bitbucket pipeline" (RmPipelineEnvironmentVariable <$> authP env <*> ownerP "The user/org that owns the repo" <*> repoNameP "The name of the repo for the pipeline" <*> envvarNameToDeleteP)
   ]
 
 runCommand :: Command -> IO ()
 runCommand =
-  renderErrorAndDie renderCliError . foldCommand (lift printVersion) listRepos printGitURL newRepo updatePipelineCfg getPipelineCfg
+  renderErrorAndDie renderCliError . foldCommand (lift printVersion) listRepos printGitURL newRepo updatePipelineCfg getPipelineCfg setPipelineEnvironmentVariable listPipelineEnvironmentVariables deletePipelineEnvironmentVariable
 
 gitURL
   :: GitURLType
