@@ -23,6 +23,9 @@ module Irreverent.Bitbucket.Options (
   , newRepoP
   , newPipelineEnvVarP
   , pipelineCfgUpdateP
+  , privateKeyPathP
+  , publicKeyPathP
+  , accessKeyLabelP
   ) where
 
 import Irreverent.Bitbucket.Core.Data.Common (
@@ -247,3 +250,20 @@ envvarSecurityP :: Parser PipelinesEnvironmentVariableSecurity
 envvarSecurityP = flag SecuredVariable UnsecuredVariable $
       long "unsecured"
   <>  help "Will expose the environment variable in the REST API, GUI and Logs, the default behaviour if this is unspecified is \"secured\" behaviour where you cannot retrieve the value via the REST API, GUI or logs, the value is only exposed to the builds"
+
+publicKeyPathP :: Parser T.Text
+publicKeyPathP = option (T.pack <$> str) $
+      long "public-key"
+  <>  metavar "PATH"
+  <>  help "Path to the public SSH key"
+
+privateKeyPathP :: Parser T.Text
+privateKeyPathP = option (T.pack <$> str) $
+      long "private-key"
+  <>  metavar "PATH"
+  <>  help "Path to the private SSH key"
+
+accessKeyLabelP :: Parser T.Text
+accessKeyLabelP = option (T.pack <$> str) $
+      long "label"
+  <>  help "A label for the Access Key"
