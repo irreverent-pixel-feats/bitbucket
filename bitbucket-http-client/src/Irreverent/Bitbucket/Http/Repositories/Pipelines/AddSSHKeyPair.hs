@@ -54,4 +54,4 @@ addSSHKeyPair sess owner reponame pair =
       , getRepoName reponame
       , "/pipelines_config/ssh/key_pair"
       ]
-  in pipelineSSHKeyPairFromJson <$> bitbucketPostJson sess endpoint (PipelinesNewSSHKeyPairJsonV2 pair)
+  in pipelineSSHKeyPairFromJson <$> bitbucketPutJson sess endpoint (PipelinesNewSSHKeyPairJsonV2 pair)
