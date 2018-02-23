@@ -21,5 +21,5 @@ import Preamble
 data AccessKey = AccessKey {
     akLabel :: !(Maybe T.Text)
   , akKey   :: !PublicSSHKey
-  , akId    :: !T.Text
+  , akId    :: !Integer
   } deriving (Show, Eq)

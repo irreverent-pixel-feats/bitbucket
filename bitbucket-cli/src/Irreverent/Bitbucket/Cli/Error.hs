@@ -17,13 +17,16 @@ module Irreverent.Bitbucket.Cli.Error (
 import Irreverent.Bitbucket.Http.Error (BitbucketAPIError, renderBitbucketAPIError)
 
 import qualified Ultra.Data.Text as T
+import Ultra.System.IO.Error (FileOpenError, renderFileOpenError)
 
 import Preamble
 
 data CliError =
-  BitbucketAPIFail !BitbucketAPIError
-  deriving (Show)
+    BitbucketAPIFail !BitbucketAPIError
+  | CliFileOpenError !FileOpenError
+    deriving (Show)
 
 renderCliError :: CliError -> T.Text
 renderCliError (BitbucketAPIFail e) = renderBitbucketAPIError e
+renderCliError (CliFileOpenError e) = renderFileOpenError e
 

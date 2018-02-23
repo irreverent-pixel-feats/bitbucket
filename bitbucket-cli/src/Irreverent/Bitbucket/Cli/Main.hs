@@ -13,6 +13,7 @@ module Irreverent.Bitbucket.Cli.Main (bitbMain) where
 
 import BuildInfo_irreverent_bitbucket_cli
 
+import Irreverent.Bitbucket.Cli.Commands.AddAccessKey
 import Irreverent.Bitbucket.Cli.Commands.ListRepos
 import Irreverent.Bitbucket.Cli.Commands.CreateRepo
 import Irreverent.Bitbucket.Cli.Commands.PipelineConfig
@@ -39,6 +40,8 @@ import Irreverent.Bitbucket.Options (
   , gitURLTypeP
   , newPipelineEnvVarP
   , pipelineCfgUpdateP
+  , accessKeyLabelP
+  , publicKeyPathP
   )
 
 import Ultra.Cli
@@ -72,6 +75,7 @@ data Command =
   | SetPipelineEnvironmentVariable !Auth !Username !RepoName !(Maybe ()) !NewPipelinesEnvironmentVariable
   | GetPipelineEnvironmentVariables !Auth !Username !RepoName
   | RmPipelineEnvironmentVariable !Auth !Username !RepoName !T.Text
+  | AddAccessKey !Auth !Username !RepoName !(Maybe T.Text) T.Text
     deriving (Show, Eq)
 
 foldCommand
@@ -84,9 +88,10 @@ foldCommand
   -> (Auth -> Username -> RepoName -> Maybe () -> NewPipelinesEnvironmentVariable -> a)
   -> (Auth -> Username -> RepoName -> a)
   -> (Auth -> Username -> RepoName -> T.Text -> a)
+  -> (Auth -> Username -> RepoName -> Maybe T.Text -> T.Text -> a)
   -> Command
   -> a
-foldCommand v ls giturl newrepo updatePipelinesCfg' getPipelineCfg' addEnvvar' pipelineEnvs' rmPipelineEnv' = \case
+foldCommand v ls giturl newrepo updatePipelinesCfg' getPipelineCfg' addEnvvar' pipelineEnvs' rmPipelineEnv' addAccessKey' = \case
   Version                      -> v
   ListRepos auth user          -> ls auth user
   GitURL urlt user repo        -> giturl urlt user repo
@@ -96,6 +101,7 @@ foldCommand v ls giturl newrepo updatePipelinesCfg' getPipelineCfg' addEnvvar' p
   SetPipelineEnvironmentVariable auth user rname force var -> addEnvvar' auth user rname force var
   GetPipelineEnvironmentVariables auth user rname -> pipelineEnvs' auth user rname
   RmPipelineEnvironmentVariable auth user rname var -> rmPipelineEnv' auth user rname var
+  AddAccessKey auth user rname label keyPath -> addAccessKey' auth user rname label keyPath
 
 commandParser' :: [(T.Text, T.Text)] -> Parser Command
 commandParser' env = commandParser Version [
@@ -107,11 +113,12 @@ commandParser' env = commandParser Version [
   , command' "set-envvar" "Sets an Environment Variable to a pipeline configuration" (SetPipelineEnvironmentVariable <$> authP env <*> ownerP "The user/org that owns the repo" <*> repoNameP "The name of the repo for the pipeline" <*> forceEnvVarSetP <*> newPipelineEnvVarP)
   , command' "ls-envvar" "List all the Environment Variables for a bitbucket pipeline" (GetPipelineEnvironmentVariables <$> authP env <*> ownerP "The user/org that owns the repo" <*> repoNameP "The name of the repo for the pipeline")
   , command' "rm-envvar" "Remove an Environment Variable from a bitbucket pipeline" (RmPipelineEnvironmentVariable <$> authP env <*> ownerP "The user/org that owns the repo" <*> repoNameP "The name of the repo for the pipeline" <*> envvarNameToDeleteP)
+  , command' "add-access-key" "Add an SSH Access Key for the repo for deploys or CI access to the repo" (AddAccessKey <$> authP env <*> ownerP "The user/org that owns the repo" <*> repoNameP "The repo to add the Access Key to" <*> optional accessKeyLabelP <*> publicKeyPathP)
   ]
 
 runCommand :: Command -> IO ()
 runCommand =
-  renderErrorAndDie renderCliError . foldCommand (lift printVersion) listRepos printGitURL newRepo updatePipelineCfg getPipelineCfg setPipelineEnvironmentVariable listPipelineEnvironmentVariables deletePipelineEnvironmentVariable
+  renderErrorAndDie renderCliError . foldCommand (lift printVersion) listRepos printGitURL newRepo updatePipelineCfg getPipelineCfg setPipelineEnvironmentVariable listPipelineEnvironmentVariables deletePipelineEnvironmentVariable addAccessKey
 
 gitURL
   :: GitURLType

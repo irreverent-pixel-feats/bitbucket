@@ -41,8 +41,15 @@ module Test.Irreverent.Bitbucket.Core.Arbitraries (
 
 import Irreverent.Bitbucket.Core
 
-import Lab.Core.Gen (maybeOf, textOf, textOfN, alphaNumChars, numChars)
-import Lab.Core.QuickCheck (Arbitrary(..), Gen, NonNegative(..), elements, frequency)
+import Lab.Core.Gen (maybeOf, textOf, alphaNumChars)
+import Lab.Core.QuickCheck (
+    Arbitrary(..)
+  , Gen
+  , NonNegative(..)
+  , choose
+  , elements
+  , frequency
+  )
 
 import Test.QuickCheck.Instances ()
 
@@ -232,4 +239,4 @@ accessKeys :: Gen AccessKey
 accessKeys = AccessKey
   <$> maybeOf (textOf alphaNumChars)
   <*> publicSSHKeys
-  <*> textOfN 6 numChars
+  <*> choose (100000, 999999)
