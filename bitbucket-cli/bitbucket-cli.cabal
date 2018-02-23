@@ -36,6 +36,7 @@ library
                       , ultra-conduit
                       , ultra-either
                       , ultra-exceptions
+                      , ultra-io
                       , ultra-optparse
                       , ultra-text
                       , ultra-semigroups
@@ -47,6 +48,7 @@ library
                         gen
 
     exposed-modules:    BuildInfo_irreverent_bitbucket_cli
+                        Irreverent.Bitbucket.Cli.Commands.AddAccessKey
                         Irreverent.Bitbucket.Cli.Commands.DeletePipelineEnvironmentVariable
                         Irreverent.Bitbucket.Cli.Commands.GetPipelineEnvironmentVariables
                         Irreverent.Bitbucket.Cli.Commands.SetPipelineEnvironmentVariable
