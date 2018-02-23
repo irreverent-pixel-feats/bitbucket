@@ -52,6 +52,7 @@ library
                         Irreverent.Bitbucket.Cli.Commands.DeletePipelineEnvironmentVariable
                         Irreverent.Bitbucket.Cli.Commands.GetPipelineEnvironmentVariables
                         Irreverent.Bitbucket.Cli.Commands.SetPipelineEnvironmentVariable
+                        Irreverent.Bitbucket.Cli.Commands.SetPipelineSSHKeys
                         Irreverent.Bitbucket.Cli.Commands.CreateRepo
                         Irreverent.Bitbucket.Cli.Commands.ListRepos
                         Irreverent.Bitbucket.Cli.Commands.PipelineConfig
