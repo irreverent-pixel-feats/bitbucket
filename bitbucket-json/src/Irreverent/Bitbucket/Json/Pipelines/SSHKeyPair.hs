@@ -36,7 +36,7 @@ pipelineSSHKeyPairFromJson = fromPipelinesSSHKeyPairJsonV2
 instance ToJSON PipelinesSSHKeyPairJsonV2 where
 --toJSON :: a -> Value
   toJSON (PipelinesSSHKeyPairJsonV2 pair) = object [
-      "public" .= jsonPublicSSHKey (pskpPublicKey pair)
+      "public_key" .= jsonPublicSSHKey (pskpPublicKey pair)
     ]
 
 instance FromJSON PipelinesSSHKeyPairJsonV2 where
@@ -44,7 +44,7 @@ instance FromJSON PipelinesSSHKeyPairJsonV2 where
   parseJSON v = PipelinesSSHKeyPairJsonV2 <$> do
     o <- parseJSON v
     PipelinesSSHKeyPair
-      <$> (o .: "public" >>= parsePublicSSHKey)
+      <$> (o .: "public_key" >>= parsePublicSSHKey)
 
 
 
