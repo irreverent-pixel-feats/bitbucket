@@ -27,6 +27,8 @@ module Irreverent.Bitbucket.Core.Data.Common (
   , MqOf(..)
   , MqType(..)
   , PipelinesEnvironmentVariableSecurity(..)
+  , PRCloseSourceBranch(..)
+  , PRState(..)
   , Privacy(..)
   , PrivateSSHKey(..)
   , Project(..)
@@ -34,10 +36,11 @@ module Irreverent.Bitbucket.Core.Data.Common (
   , ProjectName(..)
   , PublicSSHKey(..)
   , ReadWriteMode(..)
-  , RepoDescription(..)
+  , Description(..)
   , RepoName(..)
   , RepoSlug(..)
   , RepoState(..)
+  , Title(..)
   , Uuid(..)
   , Website(..)
   ) where
@@ -124,7 +127,21 @@ data HasIssues =
   | NoIssues
     deriving (Show, Eq)
 
-newtype RepoDescription = RepoDescription { getDescription :: T.Text } deriving (Show, Eq)
+data PRCloseSourceBranch =
+    CloseSourceBranch
+  | DoNotCloseSourceBranch
+    deriving (Show, Eq)
+
+data PRState =
+    Open
+  | Merged
+  | Declined
+    deriving (Show, Eq)
+
+
+newtype Description = Description { getDescription :: T.Text } deriving (Show, Eq)
+
+newtype Title = Title { getTitle :: T.Text } deriving (Show, Eq)
 
 newtype Website = Website { getWebsite :: T.Text } deriving (Show, Eq)
 

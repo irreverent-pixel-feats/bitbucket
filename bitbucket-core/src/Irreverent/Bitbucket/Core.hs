@@ -12,5 +12,6 @@ import Irreverent.Bitbucket.Core.Data.Pipelines.NewEnvironmentVariable as X
 import Irreverent.Bitbucket.Core.Data.Pipelines.SSHKeyPair as X
 import Irreverent.Bitbucket.Core.Data.Pipelines.NewSSHKeyPair as X
 import Irreverent.Bitbucket.Core.Data.Pipelines.UpdateConfig as X
+import Irreverent.Bitbucket.Core.Data.PullRequests.PullRequest as X
 import Irreverent.Bitbucket.Core.Data.Repository as X
 import Irreverent.Bitbucket.Core.Data.RepositorySummary as X
