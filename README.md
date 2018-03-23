@@ -10,6 +10,22 @@ Bitbucket Haskell API
 
 **TODO**: Write a proper description
 
+### Installing the CLI
+
+#### Ubuntu 64-bit
+
+``` shell
+# Add our APT repo if you havent already
+# Install our public key to verify our signed packages
+curl -o /tmp/ipf-public-key.asc "https://bintray.com/user/downloadSubjectPublicKey?username=irreverent-pixel-feats"
+dos2unix /tmp/ipf-public-key.asc
+apt-key add /tmp/ipf-public-key.asc
+add-apt-repository "https://dl.bintray.com/irreverent-pixel-feats/ipf xenial main"
+
+# Then actually install the app
+apt-get install bitb
+```
+
 ## Building the lot
 
 ``` shell
