@@ -1,0 +1,41 @@
+#!/bin/sh -eux
+
+PKG_ROOT="$(mktemp -d "/tmp/bitb.XXXXXXX")"
+
+BINARY="./dist/build/bitb/bitb"
+
+cd bitbucket-cli
+
+mkdir -p "${PKG_ROOT}/DEBIAN"
+
+mkdir -p "${PKG_ROOT}/usr/local/bin"
+
+cp -v "${BINARY}" "${PKG_ROOT}/usr/local/bin/bitb"
+
+VERSION="$(${PKG_ROOT}/usr/local/bin/bitb --version)"
+
+REPO_URL="https://api.bintray.com/content/irreverent-pixel-feats/ipf/bitb/${VERSION}/pool/main/m/bitb"
+
+tee "${PKG_ROOT}/DEBIAN/control" << EOF
+Package: bitb
+Version: ${VERSION}
+Architecture: $(dpkg --print-architecture)
+Maintainer: Dom De Re <domdere@irreverentpixelfeats.com>
+Description: Bitbucket CLI
+ A CLI for interfacing with the Bitbucket API.
+ https://github.com/irreverent-pixel-feats/bitbucket
+EOF
+
+# Little bit newb/naive but whatevs
+dpkg-deb --build "${PKG_ROOT}"
+
+DEB_NAME="bitb_$(dpkg --print-architecture).deb"
+
+mv -v "${PKG_ROOT}.deb" "/tmp/${DEB_NAME}"
+
+rm -rfv "${PKG_ROOT}"
+
+curl -X PUT -T "/tmp/${DEB_NAME}" \
+  -u${BINTRAY_USER}:${BINTRAY_API_KEY} \
+  -H "X-GPG-PASSPHRASE: ${BINTRAY_GPG_PASSPHRASE}" \
+  "${REPO_URL}/${DEB_NAME};deb_distribution=xenial;deb_component=main;publish=1;deb_architecture=$(dpkg --print-architecture)"
