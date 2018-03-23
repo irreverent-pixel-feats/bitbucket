@@ -57,7 +57,6 @@ import Ultra.Options.Applicative (
   )
 
 import qualified Data.ByteString as BS
-import Data.Monoid ((<>))
 
 import System.Environment (getEnvironment)
 import System.IO (putStrLn, stdout)
@@ -65,7 +64,7 @@ import System.IO (putStrLn, stdout)
 import Preamble hiding ((<>))
 
 versionString :: String
-versionString = "bitb: " <> buildInfoVersion
+versionString = buildInfoVersion
 
 data Command =
     Version
