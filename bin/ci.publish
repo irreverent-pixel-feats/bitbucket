@@ -29,7 +29,7 @@ EOF
 # Little bit newb/naive but whatevs
 dpkg-deb --build "${PKG_ROOT}"
 
-DEB_NAME="bitb_$(dpkg --print-architecture).deb"
+DEB_NAME="bitb_$(dpkg --print-architecture)-${VERSION}.deb"
 
 mv -v "${PKG_ROOT}.deb" "/tmp/${DEB_NAME}"
 
