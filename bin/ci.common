@@ -5,15 +5,9 @@ git submodule update
 
 cabal update
 
-
-cd bitbucket-cli
-
-./mafia build
-./mafia test
-
-#find . -type f -name "*.cabal" | grep -v "^\./lib" | while read P; do
-#  cd "$(dirname "${P}")"
-#  ./mafia build
-#  ./mafia test
-#  cd -
-#done
+find . -type f -name "*.cabal" | grep -v "^\./lib" | while read P; do
+  cd "$(dirname "${P}")"
+  ./mafia build
+  ./mafia test
+  cd -
+done
