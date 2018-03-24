@@ -8,8 +8,8 @@ cabal update
 
 cd bitbucket-cli
 
-./mafia
-#./mafia test
+./mafia build
+./mafia test
 
 #find . -type f -name "*.cabal" | grep -v "^\./lib" | while read P; do
 #  cd "$(dirname "${P}")"
