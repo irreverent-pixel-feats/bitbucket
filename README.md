@@ -14,6 +14,8 @@ Bitbucket Haskell API
 
 #### Ubuntu 64-bit
 
+[![Download](https://api.bintray.com/packages/irreverent-pixel-feats/ipf/bitb/images/download.svg) ](https://bintray.com/irreverent-pixel-feats/ipf/bitb/_latestVersion)
+
 ``` shell
 # Add our APT repo if you havent already
 # Install our public key to verify our signed packages
@@ -24,6 +26,15 @@ add-apt-repository "https://dl.bintray.com/irreverent-pixel-feats/ipf xenial mai
 
 # Then actually install the app
 apt-get install bitb
+```
+
+#### Mac OS X
+
+[![Download](https://api.bintray.com/packages/irreverent-pixel-feats/brew/bitb/images/download.svg) ](https://bintray.com/irreverent-pixel-feats/brew/bitb/_latestVersion)
+
+``` shell
+brew tap irreverent-pixel-feats/ipf
+brew install bitb
 ```
 
 ## Building the lot
