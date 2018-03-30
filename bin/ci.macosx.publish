@@ -1,0 +1,75 @@
+#!/bin/sh -eux
+
+#OSX_VERSION="${1:?"The version of Mac OS X you are using, sierra, el_capitan, high_sierra, etc.."}"
+FORMULA_PATH=${1:?"The path to output the formula to"}
+
+PKG_ROOT="$(mktemp -d "/tmp/bitb.XXXXXXX")"
+
+BINARY="./bitbucket-cli/dist/build/bitb/bitb"
+
+BREW_BIN_INSTALL_PATH="/usr/local/bin/bitb"
+
+BIN_PATH="bin/bitb"
+BASH_COMPLETION="_completions/bash/bitb"
+ZSH_COMPLETION="_completions/zsh/_bitb"
+FISH_COMPLETION="_completions/fish/bitb.fish"
+
+mkdir -p "${PKG_ROOT}/bin"
+mkdir -p "${PKG_ROOT}/_completions"
+mkdir -p "${PKG_ROOT}/_completions/zsh"
+mkdir -p "${PKG_ROOT}/_completions/bash"
+mkdir -p "${PKG_ROOT}/_completions/fish"
+
+cp LICENSE.md "${PKG_ROOT}"
+cp README.md "${PKG_ROOT}"
+cp -v "${BINARY}" "${PKG_ROOT}/${BIN_PATH}"
+${BINARY} --bash-completion-script "${BREW_BIN_INSTALL_PATH}" > "${PKG_ROOT}/${BASH_COMPLETION}"
+${BINARY} --zsh-completion-script "${BREW_BIN_INSTALL_PATH}" > "${PKG_ROOT}/${ZSH_COMPLETION}"
+${BINARY} --fish-completion-script "${BREW_BIN_INSTALL_PATH}" > "${PKG_ROOT}/${FISH_COMPLETION}"
+
+VERSION="$(${BINARY} --version)"
+
+REPO_URL="https://api.bintray.com/content/irreverent-pixel-feats/brew/bitb/${VERSION}/bottles"
+
+# For now im going to ignore different architectures,
+# Brew doesn't seem to handle it that well unless its a core supported
+# formula that distributes a source formula that it builds into a bottle
+# for each architecture.
+# I haven't figured out how to publish binary bottles for the different
+# "architectures" myself...
+#PKG_NAME="bitb-${VERSION}.${OSX_VERSION}.bottle.tar.gz"
+PKG_NAME="bitb-${VERSION}.bottle.tar.gz"
+
+cd "${PKG_ROOT}"
+
+tar zcvf "/tmp/${PKG_NAME}" .
+
+curl -X PUT -T "/tmp/${PKG_NAME}" \
+  -u${BINTRAY_USER}:${BINTRAY_API_KEY} \
+  -H "X-GPG-PASSPHRASE: ${BINTRAY_GPG_PASSPHRASE}" \
+  "${REPO_URL}/${PKG_NAME};publish=1"
+
+tee "${FORMULA_PATH}" << EOF
+class Bitb < Formula
+  desc "Bitbucket CLI"
+  homepage "https://github.com/irreverent-pixel-feats/bitbucket"
+  url "https://dl.bintray.com/irreverent-pixel-feats/brew/bottles/${PKG_NAME}"
+  version "${VERSION}"
+  sha256 "$(cat "/tmp/${PKG_NAME}" | sha256sum | cut -d " " -f 1)"
+
+  def install
+    bin.install "bin/bitb"
+    bash_completion.install "_completions/bash/bitb"
+    zsh_completion.install "_completions/zsh/_bitb"
+    fish_completion.install "_completions/fish/bitb.fish"
+  end
+
+  def test
+    system "#{bin}/bitb", "--version"
+  end
+end
+EOF
+
+rm -rfv "${PKG_ROOT}"
+rm -fv "/tmp/${PKG_NAME}"
+
