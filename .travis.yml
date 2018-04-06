@@ -1,5 +1,5 @@
 language: minimal
-sudo: false
+sudo: required
 dist: trusty
 
 git:
