@@ -39,7 +39,7 @@ script:
   # next build will also most likely timeout
   # (travis_wait doesnt work btw, theres still a global timeout of
   # approx 40 mins it seems.
-  - timeout 35 bin/ci
+  - timeout 35m bin/ci
 
 notifications:
   slack:
