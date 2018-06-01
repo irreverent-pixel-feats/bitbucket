@@ -29,7 +29,7 @@ library
                       , domdere-preamble
                       , ultra-exceptions
                       , ultra-text
-                      , time                    == 1.6.*
+                      , time                    >= 1.6 && < 1.9
 
     ghc-options:        -Wall
 

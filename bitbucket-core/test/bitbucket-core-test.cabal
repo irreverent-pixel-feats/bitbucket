@@ -31,7 +31,7 @@ library
                       , domdere-preamble
                       , ultra-text
                       , containers
-                      , time                    == 1.6.*
+                      , time                    >= 1.6 && < 1.9
                       , quickcheck-instances    == 0.3.*
 
     ghc-options:        -Wall

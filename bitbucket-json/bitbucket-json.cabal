@@ -29,7 +29,7 @@ library
                       , domdere-preamble
                       , irreverent-bitbucket-core
                       , iso8601-time           == 0.1.*
-                      , time                   == 1.6.*
+                      , time                   >= 1.6 && < 1.9
                       , ultra-aeson
                       , ultra-text
 
@@ -64,3 +64,5 @@ test-suite              test
                     ,   irreverent-bitbucket-core-test
                     ,   irreverent-bitbucket-json
                     ,   ultra-aeson
+
+    other-modules:      Test.Irreverent.Bitbucket.Json
