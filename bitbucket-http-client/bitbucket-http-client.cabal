@@ -30,7 +30,7 @@ library
                       , irreverent-bitbucket-core
                       , irreverent-bitbucket-json
                       , ultra-aeson
-                      , ultra-conduit
+                      , ultra-conduit-legacy
                       , ultra-either
                       , ultra-exceptions
                       , ultra-http-client
@@ -39,7 +39,7 @@ library
                       , http-client-tls        < 0.4
                       , http-conduit           == 2.2.*
                       , http-types             == 0.9.*
-                      , time                   == 1.6.*
+                      , time                   >= 1.6 && < 1.9
                       , wreq                   == 0.5.*
 
     ghc-options:        -Wall
