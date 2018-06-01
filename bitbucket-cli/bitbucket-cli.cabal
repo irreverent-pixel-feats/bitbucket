@@ -33,7 +33,7 @@ library
                       , irreverent-bitbucket-json
                       , irreverent-bitbucket-optparse
                       , ultra-cli
-                      , ultra-conduit
+                      , ultra-conduit-legacy
                       , ultra-either
                       , ultra-exceptions
                       , ultra-io
