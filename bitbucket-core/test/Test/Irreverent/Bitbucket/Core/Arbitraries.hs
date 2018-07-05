@@ -4,6 +4,9 @@
 module Test.Irreverent.Bitbucket.Core.Arbitraries (
   -- * Generators
     bitbucketDisplayNames
+  , bitbucketGroupNames
+  , bitbucketGroupOwner
+  , bitbucketGroupSlugs
   , bitbucketProjects
   , bitbucketProjectKeys
   , bitbucketProjectNames
@@ -14,10 +17,13 @@ module Test.Irreverent.Bitbucket.Core.Arbitraries (
   , environmentVariables
   , environmentVariableValues
   , forkPolicies
+  , groupPrivilegeV1s
+  , groupV1s
   , hasIssues
   , hasWikis
   , hrefs
   , languages
+  , privileges
   , accessKeys
   , newAccessKeys
   , newRepositories
@@ -29,10 +35,13 @@ module Test.Irreverent.Bitbucket.Core.Arbitraries (
   , pipelineEnvVarSecurity
   , repoDescriptions
   , repoNames
+  , repoSlugs
   , repositories
   , repositorySummaries
   , pipelineConfigs
   , updatePipelineConfigs
+  , userV1s
+  , repositoryV1s
   , scms
   , sshKeyPairs
   , uuids
@@ -42,7 +51,7 @@ module Test.Irreverent.Bitbucket.Core.Arbitraries (
 
 import Irreverent.Bitbucket.Core
 
-import Lab.Core.Gen (maybeOf, textOf, alphaNumChars)
+import Lab.Core.Gen (boundedListOf, maybeOf, textOf, alphaNumChars)
 import Lab.Core.QuickCheck (
     Arbitrary(..)
   , Gen
@@ -124,6 +133,9 @@ bitbucketProjects = Project
 
 repoNames :: Gen RepoName
 repoNames = RepoName <$> textOf alphaNumChars
+
+repoSlugs :: Gen RepoSlug
+repoSlugs = RepoSlug <$> textOf alphaNumChars
 
 websites :: Gen Website
 websites = Website <$> textOf alphaNumChars
@@ -241,3 +253,47 @@ accessKeys = AccessKey
   <$> maybeOf (textOf alphaNumChars)
   <*> publicSSHKeys
   <*> choose (100000, 999999)
+
+bitbucketGroupNames :: Gen GroupName
+bitbucketGroupNames = GroupName <$> textOf alphaNumChars
+
+bitbucketGroupOwner :: Gen GroupOwner
+bitbucketGroupOwner = GroupOwner <$> textOf alphaNumChars
+
+bitbucketGroupSlugs :: Gen GroupSlug
+bitbucketGroupSlugs = GroupSlug <$> textOf alphaNumChars
+
+userV1s :: Gen UserV1
+userV1s = UserV1
+  <$> bitbucketUsernames
+  <*> bitbucketDisplayNames
+  <*> bitbucketDisplayNames
+  <*> uris
+  <*> bitbucketUserTypes
+
+repositoryV1s :: Gen RepositoryV1
+repositoryV1s = RepositoryV1
+  <$> userV1s
+  <*> repoNames
+  <*> repoSlugs
+
+groupV1s :: Gen GroupV1
+groupV1s = GroupV1
+  <$> userV1s
+  <*> bitbucketGroupNames
+  <*> boundedListOf 15 userV1s
+  <*> bitbucketGroupSlugs
+
+privileges :: Gen PrivilegeLevel
+privileges = elements [
+    ReadOnlyPrivilege
+  , ReadWritePrivileges
+  , AdminPrivileges
+  ]
+
+groupPrivilegeV1s :: Gen GroupPrivilegeV1
+groupPrivilegeV1s = GroupPrivilegeV1
+  <$> repoNames
+  <*> privileges
+  <*> groupV1s
+  <*> repositoryV1s

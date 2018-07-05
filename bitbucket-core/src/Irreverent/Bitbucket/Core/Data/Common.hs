@@ -15,6 +15,9 @@ module Irreverent.Bitbucket.Core.Data.Common (
   , DisplayName(..)
   , EmailMailingList(..)
   , Language(..)
+  , GroupOwner(..)
+  , GroupName(..)
+  , GroupSlug(..)
   , HasIssues(..)
   , HasWiki(..)
   , Href(..)
@@ -22,6 +25,7 @@ module Irreverent.Bitbucket.Core.Data.Common (
   , User(..)
   , Username(..)
   , UserType(..)
+  , UserV1(..)
   , Uri(..)
   , ForkPolicy(..)
   , MqOf(..)
@@ -29,6 +33,7 @@ module Irreverent.Bitbucket.Core.Data.Common (
   , PipelinesEnvironmentVariableSecurity(..)
   , Privacy(..)
   , PrivateSSHKey(..)
+  , PrivilegeLevel(..)
   , Project(..)
   , ProjectKey(..)
   , ProjectName(..)
@@ -36,10 +41,14 @@ module Irreverent.Bitbucket.Core.Data.Common (
   , ReadWriteMode(..)
   , RepoDescription(..)
   , RepoName(..)
+  , RepositoryV1(..)
   , RepoSlug(..)
   , RepoState(..)
   , Uuid(..)
   , Website(..)
+  -- * Functions
+  , privilegeLevelFromText
+  , renderPrivilegeLevel
   ) where
 
 import qualified Ultra.Data.Text as T
@@ -54,9 +63,17 @@ data GitURLType =
     deriving (Show, Eq)
 
 -- In v2 of the bitbucket API, this seems like a pretty compliant ISO8601 datetime
-newtype BitbucketTime = BitbucketTime { bitbucketTime :: UTCTime} deriving (Show, Eq)
+newtype BitbucketTime = BitbucketTime { bitbucketTime :: UTCTime } deriving (Show, Eq)
 
 newtype Username = Username { getUsername :: T.Text } deriving (Show, Eq)
+
+newtype GroupOwner = GroupOwner { groupOwner :: T.Text } deriving (Show, Eq)
+
+newtype GroupName = GroupName { groupName :: T.Text } deriving (Show, Eq)
+
+newtype GroupSlug = GroupSlug {
+    groupSlug :: T.Text
+  } deriving (Show, Eq)
 
 newtype DisplayName = DisplayName { getDisplayName :: T.Text } deriving (Show, Eq)
 
@@ -80,6 +97,16 @@ data User = User {
   , userAvatar      :: !Href
   , userHtml        :: !Href
   , userSelf        :: !Href
+  } deriving (Show, Eq)
+
+-- | The User type for V1 of the Bitbucket REST API,
+-- It contains less information.
+data UserV1 = UserV1 {
+    uV1Name       :: !Username
+  , uV1FirstName  :: !DisplayName
+  , uV1LastName   :: !DisplayName
+  , uV1Avatar     :: !Uri
+  , uv1Type       :: !UserType
   } deriving (Show, Eq)
 
 newtype ProjectName = ProjectName {
@@ -118,6 +145,12 @@ data Privacy =
     deriving (Show, Eq)
 
 newtype RepoSlug = RepoSlug { getSlug :: T.Text } deriving (Show, Eq)
+
+data RepositoryV1 = RepositoryV1 {
+    rV1Owner :: !UserV1
+  , rV1Name :: !RepoName
+  , rV1Slug :: !RepoSlug
+  } deriving (Show, Eq)
 
 data HasIssues =
     HasIssues
@@ -195,3 +228,20 @@ data Scm =
     Git
   | Mercurial
     deriving (Show, Eq)
+
+data PrivilegeLevel =
+    ReadOnlyPrivilege
+  | ReadWritePrivileges
+  | AdminPrivileges
+    deriving (Show, Eq)
+
+renderPrivilegeLevel :: PrivilegeLevel -> T.Text
+renderPrivilegeLevel ReadOnlyPrivilege = "read"
+renderPrivilegeLevel ReadWritePrivileges = "write"
+renderPrivilegeLevel AdminPrivileges = "admin"
+
+privilegeLevelFromText :: T.Text -> Maybe PrivilegeLevel
+privilegeLevelFromText "read"   = pure ReadOnlyPrivilege
+privilegeLevelFromText "write"  = pure ReadWritePrivileges
+privilegeLevelFromText "admin"  = pure AdminPrivileges
+privilegeLevelFromText _        = Nothing
