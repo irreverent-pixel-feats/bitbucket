@@ -15,15 +15,20 @@ module Irreverent.Bitbucket.Json.Common (
     jsonBitbucketTime
   , jsonDisplayName
   , jsonEmailMailingList
+  , jsonGroupName
+  , jsonGroupOwner
+  , jsonGroupSlug
   , jsonLanguage
   , jsonHasIssues
   , jsonHasWiki
   , jsonUri
   , jsonHref
+  , jsonRepositoryV1
   , jsonScm
   , jsonUsername
   , jsonUuid
   , jsonUser
+  , jsonUserV1
   , jsonUserType
   , jsonForkPolicy
   , jsonPipelineEnvVarSecurity
@@ -42,6 +47,9 @@ module Irreverent.Bitbucket.Json.Common (
   , parseBitbucketTimeJson
   , parseDisplayNameJson
   , parseEmailMailingListJson
+  , parseGroupName
+  , parseGroupOwner
+  , parseGroupSlug
   , parseLanguageJson
   , parseHasIssuesJson
   , parseHasWikiJson
@@ -52,6 +60,7 @@ module Irreverent.Bitbucket.Json.Common (
   , parseUuidJson
   , parseUserTypeJson
   , parseUserJson
+  , parseUserV1
   , parseForkPolicyJson
   , parsePrivacyJson
   , parseProjectKeyJson
@@ -64,13 +73,56 @@ module Irreverent.Bitbucket.Json.Common (
   , parseRepoDescriptionJson
   , parseRepoName
   , parseRepoSlug
+  , parseRepositoryV1
   , parseWebSiteJson
   ) where
 
--- TODO: explicit export list
-import Irreverent.Bitbucket.Core.Data.Common
+import Irreverent.Bitbucket.Core.Data.Common (
+    BitbucketTime(..)
+  , DisplayName(..)
+  , EmailMailingList(..)
+  , ForkPolicy(..)
+  , Language(..)
+  , GroupName(..)
+  , GroupOwner(..)
+  , GroupSlug(..)
+  , HasIssues(..)
+  , HasWiki(..)
+  , Href(..)
+  , PipelinesEnvironmentVariableSecurity(..)
+  , Privacy(..)
+  , Project(..)
+  , ProjectKey(..)
+  , ProjectName(..)
+  , PrivateSSHKey(..)
+  , PublicSSHKey(..)
+  , RepoDescription(..)
+  , RepoName(..)
+  , RepositoryV1(..)
+  , RepoSlug(..)
+  , Scm(..)
+  , Uri(..)
+  , User(..)
+  , Username(..)
+  , UserType(..)
+  , UserV1(..)
+  , Uuid(..)
+  , Website(..)
+  )
 
-import Ultra.Data.Aeson (KeyValue, Parser, Object, Value(..), (.=), (.:), (.:?) , object, parseJSON, toJSON)
+import Ultra.Data.Aeson (
+    KeyValue
+  , Parser
+  , Object
+  , Value(..)
+  , (.=)
+  , (.:)
+  , (.:?)
+  , object
+  , parseJSON
+  , toJSON
+  , jsonTextEnum
+  )
 import qualified Ultra.Data.Text as T
 
 import Data.Time.ISO8601 (formatISO8601, parseISO8601)
@@ -295,6 +347,66 @@ jsonRepoName (RepoName repoName) = toJSON repoName
 parseRepoName :: Value -> Parser RepoName
 parseRepoName v = RepoName <$> parseJSON v
 
+jsonGroupOwner :: GroupOwner -> Value
+jsonGroupOwner (GroupOwner owner) = toJSON owner
+
+parseGroupOwner :: Value -> Parser GroupOwner
+parseGroupOwner = fmap GroupOwner . parseJSON
+
+jsonGroupName :: GroupName -> Value
+jsonGroupName (GroupName name) = toJSON name
+
+parseGroupName :: Value -> Parser GroupName
+parseGroupName = fmap GroupName . parseJSON
+
+jsonGroupSlug :: GroupSlug -> Value
+jsonGroupSlug (GroupSlug s) = toJSON s
+
+parseGroupSlug :: Value -> Parser GroupSlug
+parseGroupSlug = fmap GroupSlug . parseJSON
+
+jsonUserV1 :: UserV1 -> Value
+jsonUserV1 (UserV1 nm first' last' avatar typ) =
+  let
+    isTeam :: Bool
+    isTeam = case typ of
+      TeamUserType -> True
+      UserUserType -> False
+  in object [
+      "username" .= jsonUsername nm
+    , "first_name" .= jsonDisplayName first'
+    , "last_name" .= jsonDisplayName last'
+    , "avatar" .= jsonUri avatar
+    , "is_team" .= isTeam
+    ]
+
+parseUserV1 :: Object -> Parser UserV1
+parseUserV1 o =
+  let
+    userType' :: Bool -> UserType
+    userType' True = TeamUserType
+    userType' False = UserUserType
+
+  in UserV1
+    <$> (o .: "username" >>= parseUsernameJson) 
+    <*> (o .: "first_name" >>= parseDisplayNameJson)
+    <*> (o .: "last_name" >>= parseDisplayNameJson)
+    <*> (o .: "avatar" >>= parseUriJson)
+    <*> (userType' <$> o .: "is_team")
+
+jsonRepositoryV1 :: RepositoryV1 -> Value
+jsonRepositoryV1 (RepositoryV1 owner nm slug) = object [
+    "owner" .= jsonUserV1 owner
+  , "name" .= jsonRepoName nm
+  , "slug" .= jsonRepoSlug slug
+  ]
+
+parseRepositoryV1 :: Object -> Parser RepositoryV1
+parseRepositoryV1 o = RepositoryV1
+  <$> (o .: "owner" >>= parseUserV1)
+  <*> (o .: "name" >>= parseRepoName)
+  <*> (o .: "slug" >>= parseRepoSlug)
+
 jsonRepoSlug :: RepoSlug -> Value
 jsonRepoSlug (RepoSlug slug) = toJSON slug
 
@@ -306,19 +418,3 @@ jsonWebsite (Website website) = toJSON website
 
 parseWebSiteJson :: Value -> Parser Website
 parseWebSiteJson v = Website <$> parseJSON v
-
--- helpers
-
--- this should go in ultra-aeson
-
-jsonTextEnum :: NonEmpty (T.Text, a) -> Value -> Parser a
-jsonTextEnum cases v =
-  let
-    errorText :: T.Text -> T.Text
-    errorText found = T.bracketedList "expected one of ['" (T.concat ["'], but found: '", found, "'"]) "', '" . toList . fmap fst $ cases
-  in do
-    t <- parseJSON v
-    foldr
-      (\(t', x) p -> if (t == t') then pure x else p)
-      (fail . T.unpack . errorText $ t)
-      cases
