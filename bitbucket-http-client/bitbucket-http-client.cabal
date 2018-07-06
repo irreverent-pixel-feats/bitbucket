@@ -49,6 +49,7 @@ library
     exposed-modules:    Irreverent.Bitbucket.Http
                         Irreverent.Bitbucket.Http.Common
                         Irreverent.Bitbucket.Http.Error
+                        Irreverent.Bitbucket.Http.Groups.Privileges.Add
                         Irreverent.Bitbucket.Http.Methods
                         Irreverent.Bitbucket.Http.Paginated
                         Irreverent.Bitbucket.Http.Repositories.AddAccessKey

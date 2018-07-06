@@ -14,6 +14,7 @@ module Irreverent.Bitbucket.Http.Methods (
   , bitbucketGet
   , bitbucketPostJson
   , bitbucketPutJson
+  , bitbucketPutJsonResp
   ) where
 
 import Irreverent.Bitbucket.Http.Common
@@ -81,6 +82,17 @@ bitbucketPutJson
 bitbucketPutJson sess req body =
   bitbucketReq $ \opts ->
     S.putWith opts sess (T.unpack req) (toJSON body)
+
+bitbucketPutJsonResp
+  :: (FromJSON b, MonadCatch m, MonadIO m)
+  => S.Session
+  -> T.Text
+  -> T.Text
+  -> EitherT BitbucketAPIError (BitbucketT m) b
+bitbucketPutJsonResp sess req body =
+  bitbucketReq $ \opts ->
+    S.putWith opts sess (T.unpack req) (T.encodeUtf8 body)
+
 
 bitbucketReq
   :: (FromJSON a, MonadCatch m, MonadIO m)

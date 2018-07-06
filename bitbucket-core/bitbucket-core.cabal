@@ -40,6 +40,8 @@ library
                         Irreverent.Bitbucket.Core.Data.Auth
                         Irreverent.Bitbucket.Core.Data.Common
                         Irreverent.Bitbucket.Core.Data.AccessKey
+                        Irreverent.Bitbucket.Core.Data.Group
+                        Irreverent.Bitbucket.Core.Data.Groups.Privileges
                         Irreverent.Bitbucket.Core.Data.NewAccessKey
                         Irreverent.Bitbucket.Core.Data.NewRepository
                         Irreverent.Bitbucket.Core.Data.Paginated

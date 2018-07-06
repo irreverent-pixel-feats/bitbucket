@@ -104,6 +104,13 @@ prop_newSSHKeyPair =
     PipelinesNewSSHKeyPairJsonV2
     pipelineNewSSHKeyPairFromJson
 
+prop_groupPrivileges :: Property
+prop_groupPrivileges =
+  test
+    groupPrivilegeV1s
+    GroupPrivilegeV1Json
+    fromGroupPrivilegeV1Json
+
 return []
 tests :: IO Bool
 tests = $quickCheckAll
