@@ -16,6 +16,7 @@ module Irreverent.Bitbucket.Options (
   , ownerArgP
   , repoNameP
   , repoNameArgP
+  , repoSlugP
   , authP
   , envvarNameToDeleteP
   , forceEnvVarSetP
@@ -24,23 +25,31 @@ module Irreverent.Bitbucket.Options (
   , newPipelineEnvVarP
   , pipelineCfgUpdateP
   , privateKeyPathP
+  , privilegeLevelP
   , publicKeyPathP
   , accessKeyLabelP
+  , groupNameP
+  , groupOwnerP
   ) where
 
 import Irreverent.Bitbucket.Core.Data.Common (
     Username(..)
   , ForkPolicy(..)
   , GitURLType(..)
+  , GroupName(..)
+  , GroupOwner(..)
   , HasWiki(..)
   , HasIssues(..)
   , Language(..)
   , PipelinesEnvironmentVariableSecurity(..)
   , Privacy(..)
+  , PrivilegeLevel(..)
   , ProjectKey(..)
   , RepoDescription(..)
   , RepoName(..)
+  , RepoSlug(..)
   , Scm(..)
+  , privilegeLevelFromText
   )
 
 import Irreverent.Bitbucket.Core.Data.Auth (Auth(..))
@@ -97,6 +106,13 @@ repoNameP htext = option (RepoName . T.pack <$> str) $
       short 'r'
   <>  long "repository"
   <>  help (T.unpack htext)
+
+repoSlugP :: T.Text -> Parser RepoSlug
+repoSlugP htext = option (RepoSlug . T.pack <$> str) $
+      short 'r'
+  <>  long "repository"
+  <>  help (T.unpack htext)
+
 
 repoNameArgP :: T.Text -> Parser RepoName
 repoNameArgP htext = argument (RepoName . T.pack <$> str) $
@@ -267,3 +283,24 @@ accessKeyLabelP :: Parser T.Text
 accessKeyLabelP = option (T.pack <$> str) $
       long "label"
   <>  help "A label for the Access Key"
+
+groupOwnerP :: T.Text -> Parser GroupOwner
+groupOwnerP htext = option (GroupOwner . T.pack <$> str) $
+      long "group-owner"
+  <>  help (T.unpack htext)
+
+groupNameP :: T.Text -> Parser GroupName
+groupNameP htext = option (GroupName . T.pack <$> str) $
+      short 'g'
+  <>  long "group"
+  <>  help (T.unpack htext)
+
+privilegeLevelP :: Parser PrivilegeLevel
+privilegeLevelP =
+  let
+    reader' :: T.Text -> Either T.Text PrivilegeLevel
+    reader' t = maybe (Left t) pure . privilegeLevelFromText $ t
+  in option (eitherTextReader reader') $
+       short 'p'
+    <> long "privileges"
+    <> help "The desired privilege level: read, write or admin"
