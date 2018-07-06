@@ -18,13 +18,22 @@ import Irreverent.Bitbucket.Cli.Commands.ListRepos
 import Irreverent.Bitbucket.Cli.Commands.CreateRepo
 import Irreverent.Bitbucket.Cli.Commands.PipelineConfig
 import Irreverent.Bitbucket.Cli.Commands.UpdatePipelineConfig
+import Irreverent.Bitbucket.Cli.Commands.SetGroupPrivs
 import Irreverent.Bitbucket.Cli.Commands.SetPipelineEnvironmentVariable
 import Irreverent.Bitbucket.Cli.Commands.SetPipelineSSHKeys
 import Irreverent.Bitbucket.Cli.Commands.DeletePipelineEnvironmentVariable
 import Irreverent.Bitbucket.Cli.Commands.GetPipelineEnvironmentVariables
 import Irreverent.Bitbucket.Cli.Error
 
-import Irreverent.Bitbucket.Core (GitURLType(..), RepoName(..), Username(..))
+import Irreverent.Bitbucket.Core (
+    GitURLType(..)
+  , GroupName(..)
+  , GroupOwner(..)
+  , PrivilegeLevel(..)
+  , RepoName(..)
+  , RepoSlug(..)
+  , Username(..)
+  )
 import Irreverent.Bitbucket.Core.Data.Auth (Auth)
 import Irreverent.Bitbucket.Core.Data.NewRepository (NewRepository(..))
 import Irreverent.Bitbucket.Core.Data.Pipelines.UpdateConfig (UpdatePipelinesConfig(..))
@@ -38,11 +47,15 @@ import Irreverent.Bitbucket.Options (
   , ownerArgP
   , repoNameP
   , repoNameArgP
+  , repoSlugP
   , gitURLTypeP
+  , groupNameP
+  , groupOwnerP
   , newPipelineEnvVarP
   , pipelineCfgUpdateP
   , accessKeyLabelP
   , privateKeyPathP
+  , privilegeLevelP
   , publicKeyPathP
   )
 
@@ -78,6 +91,7 @@ data Command =
   | RmPipelineEnvironmentVariable !Auth !Username !RepoName !T.Text
   | AddAccessKey !Auth !Username !RepoName !(Maybe T.Text) T.Text
   | SetPipelineSSHKeys !Auth !Username !RepoName !T.Text T.Text
+  | SetGroupPrivs !Auth !Username !RepoSlug !GroupOwner !GroupName !PrivilegeLevel
     deriving (Show, Eq)
 
 foldCommand
@@ -92,9 +106,10 @@ foldCommand
   -> (Auth -> Username -> RepoName -> T.Text -> a)
   -> (Auth -> Username -> RepoName -> Maybe T.Text -> T.Text -> a)
   -> (Auth -> Username -> RepoName -> T.Text -> T.Text -> a)
+  -> (Auth -> Username -> RepoSlug -> GroupOwner -> GroupName -> PrivilegeLevel -> a)
   -> Command
   -> a
-foldCommand v ls giturl newrepo updatePipelinesCfg' getPipelineCfg' addEnvvar' pipelineEnvs' rmPipelineEnv' addAccessKey' setPipelineSSHKeys' = \case
+foldCommand v ls giturl newrepo updatePipelinesCfg' getPipelineCfg' addEnvvar' pipelineEnvs' rmPipelineEnv' addAccessKey' setPipelineSSHKeys' setGroupPriv' = \case
   Version                      -> v
   ListRepos auth user          -> ls auth user
   GitURL urlt user repo        -> giturl urlt user repo
@@ -106,6 +121,7 @@ foldCommand v ls giturl newrepo updatePipelinesCfg' getPipelineCfg' addEnvvar' p
   RmPipelineEnvironmentVariable auth user rname var -> rmPipelineEnv' auth user rname var
   AddAccessKey auth user rname label keyPath -> addAccessKey' auth user rname label keyPath
   SetPipelineSSHKeys auth user rname privPath pubPath -> setPipelineSSHKeys' auth user rname privPath pubPath
+  SetGroupPrivs auth owner rname gowner grp priv -> setGroupPriv' auth owner rname gowner grp priv
 
 commandParser' :: [(T.Text, T.Text)] -> Parser Command
 commandParser' env = commandParser Version [
@@ -119,11 +135,12 @@ commandParser' env = commandParser Version [
   , command' "rm-envvar" "Remove an Environment Variable from a bitbucket pipeline" (RmPipelineEnvironmentVariable <$> authP env <*> ownerP "The user/org that owns the repo" <*> repoNameP "The name of the repo for the pipeline" <*> envvarNameToDeleteP)
   , command' "add-access-key" "Add an SSH Access Key for the repo for deploys or CI access to the repo" (AddAccessKey <$> authP env <*> ownerP "The user/org that owns the repo" <*> repoNameP "The repo to add the Access Key to" <*> optional accessKeyLabelP <*> publicKeyPathP)
   , command' "set-pipeline-ssh-keys" "Set the SSH keys for the bitbucket pipelines build environment" (SetPipelineSSHKeys <$> authP env <*> ownerP "The user/org that owns the repo" <*> repoNameP "The repo for the pipeline you want to add the keys to" <*> privateKeyPathP <*> publicKeyPathP)
+  , command' "set-group-privilege" "Sets the group privilege on a repository" (SetGroupPrivs <$> authP env <*> ownerP "The user/org that owns the repo the privilege is concerned with" <*> repoSlugP "The repo for the privilege" <*> groupOwnerP "The org that owns the group for the privilege" <*> groupNameP "The group for the privilege" <*> privilegeLevelP)
   ]
 
 runCommand :: Command -> IO ()
 runCommand =
-  renderErrorAndDie renderCliError . foldCommand (lift printVersion) listRepos printGitURL newRepo updatePipelineCfg getPipelineCfg setPipelineEnvironmentVariable listPipelineEnvironmentVariables deletePipelineEnvironmentVariable addAccessKey setPipelinesSSHKeys
+  renderErrorAndDie renderCliError . foldCommand (lift printVersion) listRepos printGitURL newRepo updatePipelineCfg getPipelineCfg setPipelineEnvironmentVariable listPipelineEnvironmentVariables deletePipelineEnvironmentVariable addAccessKey setPipelinesSSHKeys addGroupPrivilege
 
 gitURL
   :: GitURLType
