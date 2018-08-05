@@ -38,7 +38,6 @@ library
                       , ultra-text
                       , http-client-tls        < 0.4
                       , http-conduit           == 2.2.*
-                      , http-types             == 0.9.*
                       , time                   >= 1.6 && < 1.9
                       , wreq                   == 0.5.*
 
