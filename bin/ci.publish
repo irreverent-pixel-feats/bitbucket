@@ -35,7 +35,12 @@ mv -v "${PKG_ROOT}.deb" "/tmp/${DEB_NAME}"
 
 rm -rfv "${PKG_ROOT}"
 
-curl -X PUT -T "/tmp/${DEB_NAME}" \
-  -u${BINTRAY_USER}:${BINTRAY_API_KEY} \
-  -H "X-GPG-PASSPHRASE: ${BINTRAY_GPG_PASSPHRASE}" \
-  "${REPO_URL}/${DEB_NAME};deb_distribution=xenial;deb_component=main;publish=1;deb_architecture=$(dpkg --print-architecture)"
+for DIST in xenial bionic
+do
+
+  curl -X PUT -T "/tmp/${DEB_NAME}" \
+    -u${BINTRAY_USER}:${BINTRAY_API_KEY} \
+    -H "X-GPG-PASSPHRASE: ${BINTRAY_GPG_PASSPHRASE}" \
+    "${REPO_URL}/${DEB_NAME};deb_distribution=${DIST};deb_component=main;publish=1;deb_architecture=$(dpkg --print-architecture)"
+
+done

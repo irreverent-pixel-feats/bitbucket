@@ -1,6 +1,6 @@
 language: minimal
 sudo: required
-dist: trusty
+dist: xenial
 
 git:
   submodules: false
@@ -12,14 +12,14 @@ cache:
 
 matrix:
   include:
-  - env: GHCVER=8.2.2 CABALVER=2.0
+  - env: GHCVER=8.4.4 CABALVER=2.0
     addons:
       apt:
         update: true
         sources:
           - hvr-ghc
         packages:
-          - ghc-8.2.2
+          - ghc-8.4.4
           - cabal-install-2.0
   #allow-failures:
   #  - env: GHCVER=head

@@ -2,7 +2,7 @@
 
 bin/ci.branches
 
-if [ "${TRAVIS_BRANCH}" = "master" -a "${GHCVER}" = "8.2.2" -a "${CABALVER}" = "2.0" ]
+if [ "${TRAVIS_BRANCH}" = "master" -a "${GHCVER}" = "8.4.4" -a "${CABALVER}" = "2.0" ]
 then
   bin/ci.publish
 fi
